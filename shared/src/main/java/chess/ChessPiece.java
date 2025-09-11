@@ -53,13 +53,59 @@ public class ChessPiece {
      *
      * @return Collection of valid moves
      */
-    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        ChessPiece piece = board.getPiece(myPosition);
+
+    /**
+     * Bishop Moves Calculator
+     */
+    public Collection<ChessMove> bishopMovesCalculator(ChessBoard board, ChessPosition myPosition) {
         var moves = new HashSet<ChessMove>();
-        if (piece.getPieceType() == PieceType.BISHOP) {
-            moves.add(new ChessMove(new ChessPosition(5,4), new ChessPosition(6,5), null));
+        for (int i = 0; i < 4; i++) {
+            // runs though 4 times for each bishop direction, up-left, up-right, down-right, down-left
+            int row = myPosition.getRow();
+            int col = myPosition.getColumn();
+            if (i == 0) {
+                while (true) {
+                    row++;
+                    if (row > 8) {
+                        break;
+                    }
+                    col--;
+                    if (col < 1) {
+                        break;
+                    }
+                    if (board.getPiece(new ChessPosition(row, col)) == null) {
+                        // keep going
+                        moves.add(new ChessMove(new ChessPosition((myPosition.getRow()), myPosition.getColumn()), new ChessPosition(row, col), null));
+                    }
+                    else {
+                        // piece detected, check for color
+                        ChessPiece currPiece = board.getPiece(new ChessPosition(row, col));
+                        if (pieceColor == currPiece.getTeamColor()) {
+                            // same team
+                            break;
+                        }
+                        else {
+                            // other team
+                            moves.add(new ChessMove(new ChessPosition((myPosition.getRow()), myPosition.getColumn()), new ChessPosition(row, col), null));
+                            break;
+                        }
+                    }
+                }
+                System.out.println("Iteration: " + i);
+            }
         }
         return moves;
+    }
+
+
+    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+        ChessPiece piece = board.getPiece(myPosition);
+        // var moves = new HashSet<ChessMove>();
+        if (piece.getPieceType() == PieceType.BISHOP) {
+            // moves.add(new ChessMove(new ChessPosition(5,4), new ChessPosition(6,5), null));
+            return bishopMovesCalculator(board, myPosition);
+        }
+        return null;
     }
 
     @Override
