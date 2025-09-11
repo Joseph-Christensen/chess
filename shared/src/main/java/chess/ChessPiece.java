@@ -47,16 +47,9 @@ public class ChessPiece {
     }
 
     /**
-     * Calculates all the positions a chess piece can move to
-     * Does not take into account moves that are illegal due to leaving the king in
-     * danger
-     *
-     * @return Collection of valid moves
-     */
-
-    /**
      * Bishop Moves Calculator
      */
+
     public Collection<ChessMove> bishopMovesCalculator(ChessBoard board, ChessPosition myPosition) {
         var moves = new HashSet<ChessMove>();
         for (int i = 0; i < 4; i++) {
@@ -97,6 +90,13 @@ public class ChessPiece {
         return moves;
     }
 
+    /**
+     * Calculates all the positions a chess piece can move to
+     * Does not take into account moves that are illegal due to leaving the king in
+     * danger
+     *
+     * @return Collection of valid moves
+     */
 
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
