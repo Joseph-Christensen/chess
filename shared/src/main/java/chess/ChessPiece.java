@@ -75,7 +75,10 @@ public class ChessPiece {
             QueenMovesCalculator queenCalc = new QueenMovesCalculator(board, myPosition, this);
             return queenCalc.returnMoves();
         }
-        return null;
+        else {
+            PawnMovesCalculator pawnCalc = new PawnMovesCalculator(board, myPosition, this);
+            return pawnCalc.returnMoves();
+        }
     }
 
     @Override
