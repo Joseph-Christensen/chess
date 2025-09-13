@@ -19,7 +19,7 @@ public class KingMovesCalculator {
         var moves = new HashSet<ChessMove>();
         ChessGame.TeamColor pieceColor = piece.getTeamColor();
         for (int i = 0; i < 8; i++) {
-            // runs though 8 times for each rook direction, left, up-left, up, up-right, right, down-right, down, down-left
+            // runs though 8 times for each king direction, left, up-left, up, up-right, right, down-right, down, down-left
             int row = position.getRow();
             int col = position.getColumn();
             if (i == 0) {

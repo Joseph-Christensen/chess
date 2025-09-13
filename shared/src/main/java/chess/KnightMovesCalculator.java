@@ -19,7 +19,7 @@ public class KnightMovesCalculator {
         var moves = new HashSet<ChessMove>();
         ChessGame.TeamColor pieceColor = piece.getTeamColor();
         for (int i = 0; i < 8; i++) {
-            // runs though 8 times for each rook direction, left-up, up-left, up-right, right-up, right-down, down-right, down-left, left-down
+            // runs though 8 times for each knight direction, left-up, up-left, up-right, right-up, right-down, down-right, down-left, left-down
             int row = position.getRow();
             int col = position.getColumn();
             if (i == 0) {
