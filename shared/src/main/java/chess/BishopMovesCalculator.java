@@ -7,12 +7,12 @@ import java.util.Objects;
 public class BishopMovesCalculator {
 
     private final ChessBoard board;
-    private final ChessPosition myPosition;
+    private final ChessPosition position;
     private final ChessPiece piece;
 
-    BishopMovesCalculator (ChessBoard board, ChessPosition myPosition, ChessPiece piece) {
+    BishopMovesCalculator (ChessBoard board, ChessPosition position, ChessPiece piece) {
         this.board = board;
-        this.myPosition = myPosition;
+        this.position = position;
         this.piece = piece;
     }
 
@@ -21,8 +21,8 @@ public class BishopMovesCalculator {
         ChessGame.TeamColor pieceColor = piece.getTeamColor();
         for (int i = 0; i < 4; i++) {
             // runs though 4 times for each bishop direction, up-left, up-right, down-right, down-left
-            int row = myPosition.getRow();
-            int col = myPosition.getColumn();
+            int row = position.getRow();
+            int col = position.getColumn();
             if (i == 0) {
                 // up-left
                 while (true) {
@@ -36,7 +36,7 @@ public class BishopMovesCalculator {
                     }
                     if (board.getPiece(new ChessPosition(row, col)) == null) {
                         // keep going
-                        moves.add(new ChessMove(new ChessPosition((myPosition.getRow()), myPosition.getColumn()), new ChessPosition(row, col), null));
+                        moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
                     }
                     else {
                         // piece detected, check for color
@@ -47,7 +47,7 @@ public class BishopMovesCalculator {
                         }
                         else {
                             // other team
-                            moves.add(new ChessMove(new ChessPosition((myPosition.getRow()), myPosition.getColumn()), new ChessPosition(row, col), null));
+                            moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
                             break;
                         }
                     }
@@ -66,7 +66,7 @@ public class BishopMovesCalculator {
                     }
                     if (board.getPiece(new ChessPosition(row, col)) == null) {
                         // keep going
-                        moves.add(new ChessMove(new ChessPosition((myPosition.getRow()), myPosition.getColumn()), new ChessPosition(row, col), null));
+                        moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
                     }
                     else {
                         // piece detected, check for color
@@ -77,7 +77,7 @@ public class BishopMovesCalculator {
                         }
                         else {
                             // other team
-                            moves.add(new ChessMove(new ChessPosition((myPosition.getRow()), myPosition.getColumn()), new ChessPosition(row, col), null));
+                            moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
                             break;
                         }
                     }
@@ -96,7 +96,7 @@ public class BishopMovesCalculator {
                     }
                     if (board.getPiece(new ChessPosition(row, col)) == null) {
                         // keep going
-                        moves.add(new ChessMove(new ChessPosition((myPosition.getRow()), myPosition.getColumn()), new ChessPosition(row, col), null));
+                        moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
                     }
                     else {
                         // piece detected, check for color
@@ -107,7 +107,7 @@ public class BishopMovesCalculator {
                         }
                         else {
                             // other team
-                            moves.add(new ChessMove(new ChessPosition((myPosition.getRow()), myPosition.getColumn()), new ChessPosition(row, col), null));
+                            moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
                             break;
                         }
                     }
@@ -126,7 +126,7 @@ public class BishopMovesCalculator {
                     }
                     if (board.getPiece(new ChessPosition(row, col)) == null) {
                         // keep going
-                        moves.add(new ChessMove(new ChessPosition((myPosition.getRow()), myPosition.getColumn()), new ChessPosition(row, col), null));
+                        moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
                     }
                     else {
                         // piece detected, check for color
@@ -137,7 +137,7 @@ public class BishopMovesCalculator {
                         }
                         else {
                             // other team
-                            moves.add(new ChessMove(new ChessPosition((myPosition.getRow()), myPosition.getColumn()), new ChessPosition(row, col), null));
+                            moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
                             break;
                         }
                     }

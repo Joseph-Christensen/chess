@@ -3,13 +3,13 @@ package chess;
 import java.util.Collection;
 import java.util.HashSet;
 
-public class KingMovesCalculator {
+public class KnightMovesCalculator {
 
     private final ChessBoard board;
     private final ChessPosition position;
     private final ChessPiece piece;
 
-    KingMovesCalculator(ChessBoard board, ChessPosition position, ChessPiece piece) {
+    KnightMovesCalculator (ChessBoard board, ChessPosition position, ChessPiece piece) {
         this.board = board;
         this.position = position;
         this.piece = piece;
@@ -19,13 +19,15 @@ public class KingMovesCalculator {
         var moves = new HashSet<ChessMove>();
         ChessGame.TeamColor pieceColor = piece.getTeamColor();
         for (int i = 0; i < 8; i++) {
-            // runs though 8 times for each rook direction, left, up-left, up, up-right, right, down-right, down, down-left
+            // runs though 8 times for each rook direction, left-up, up-left, up-right, right-up, right-down, down-right, down-left, left-down
             int row = position.getRow();
             int col = position.getColumn();
             if (i == 0) {
-                // left
+                // left-up
                 col--;
-                if (col > 0) {
+                col--;
+                row++;
+                if (col > 0 && row < 9) {
                     if (board.getPiece(new ChessPosition(row, col)) == null) {
                         // keep going
                         moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
@@ -42,8 +44,9 @@ public class KingMovesCalculator {
             }
             else if (i == 1) {
                 // up-left
-                row++;
                 col--;
+                row++;
+                row++;
                 if ((col > 0) && (row < 9)) {
                     if (board.getPiece(new ChessPosition(row, col)) == null) {
                         // keep going
@@ -60,9 +63,11 @@ public class KingMovesCalculator {
                 }
             }
             else if (i == 2) {
-                // up
+                // up-right
+                col++;
                 row++;
-                if (row < 9) {
+                row++;
+                if (col < 9 && row < 9) {
                     if (board.getPiece(new ChessPosition(row, col)) == null) {
                         // keep going
                         moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
@@ -78,10 +83,11 @@ public class KingMovesCalculator {
                 }
             }
             else if (i == 3) {
-                // up-right
-                row++;
+                // right-up
                 col++;
-                if ((col < 9) && (row < 9)) {
+                col++;
+                row++;
+                if (col < 9 && row < 9) {
                     if (board.getPiece(new ChessPosition(row, col)) == null) {
                         // keep going
                         moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
@@ -97,9 +103,11 @@ public class KingMovesCalculator {
                 }
             }
             else if (i == 4) {
-                // right
+                // right-down
                 col++;
-                if (col < 9) {
+                col++;
+                row--;
+                if (col < 9 && row > 0) {
                     if (board.getPiece(new ChessPosition(row, col)) == null) {
                         // keep going
                         moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
@@ -116,8 +124,9 @@ public class KingMovesCalculator {
             }
             else if (i == 5) {
                 // down-right
-                row--;
                 col++;
+                row--;
+                row--;
                 if ((col < 9) && (row > 0)) {
                     if (board.getPiece(new ChessPosition(row, col)) == null) {
                         // keep going
@@ -134,9 +143,11 @@ public class KingMovesCalculator {
                 }
             }
             else if (i == 6) {
-                // down
+                // down-left
                 row--;
-                if (row > 0) {
+                row--;
+                col--;
+                if (col> 0 && row > 0) {
                     if (board.getPiece(new ChessPosition(row, col)) == null) {
                         // keep going
                         moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
@@ -152,10 +163,11 @@ public class KingMovesCalculator {
                 }
             }
             else {
-                // down-left
-                row--;
+                // left-down
                 col--;
-                if ((col > 0) && (row > 0)) {
+                col--;
+                row--;
+                if (col > 0 && row > 0) {
                     if (board.getPiece(new ChessPosition(row, col)) == null) {
                         // keep going
                         moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
