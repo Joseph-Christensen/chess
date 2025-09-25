@@ -1,7 +1,5 @@
 package chess;
 
-import java.sql.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -48,7 +46,7 @@ public class ChessBoard {
             }
         }
 
-        ChessPiece.PieceType pieceOrder[] = {
+        ChessPiece.PieceType[] pieceOrder = {
                 ChessPiece.PieceType.ROOK, ChessPiece.PieceType.KNIGHT,
                 ChessPiece.PieceType.BISHOP, ChessPiece.PieceType.QUEEN,
                 ChessPiece.PieceType.KING, ChessPiece.PieceType.BISHOP,
