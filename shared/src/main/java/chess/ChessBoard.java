@@ -1,5 +1,7 @@
 package chess;
 
+import java.sql.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -10,8 +12,7 @@ import java.util.Arrays;
  */
 public class ChessBoard {
 
-
-    final private ChessPiece[][] board = new ChessPiece[8][8];
+    private final ChessPiece[][] board = new ChessPiece[8][8];
 
     public ChessBoard() {}
 
@@ -41,29 +42,24 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        // resets the board
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 board[i][j] = null;
             }
         }
-        // ordering of pieces along the back from left to right
-        ChessPiece.PieceType[] pieceOrder = {
+
+        ChessPiece.PieceType pieceOrder[] = {
                 ChessPiece.PieceType.ROOK, ChessPiece.PieceType.KNIGHT,
                 ChessPiece.PieceType.BISHOP, ChessPiece.PieceType.QUEEN,
                 ChessPiece.PieceType.KING, ChessPiece.PieceType.BISHOP,
-                ChessPiece.PieceType.KNIGHT, ChessPiece.PieceType.ROOK,
+                ChessPiece.PieceType.KNIGHT, ChessPiece.PieceType.ROOK
         };
-        // for loop adding all the pieces column by column
-        for (int i = 1; i < 9; i++) {
-            // white back row
-            addPiece(new ChessPosition(1, i), new ChessPiece(ChessGame.TeamColor.WHITE, pieceOrder[i - 1]));
-            // white second row
-            addPiece(new ChessPosition(2, i), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
-            // black back row
-            addPiece(new ChessPosition(8, i), new ChessPiece(ChessGame.TeamColor.BLACK, pieceOrder[i - 1]));
-            // black second row
-            addPiece(new ChessPosition(7, i), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+
+        for (int i = 0; i < 8; i++) {
+            addPiece(new ChessPosition(1, i + 1), new ChessPiece(ChessGame.TeamColor.WHITE, pieceOrder[i]));
+            addPiece(new ChessPosition(2, i + 1), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+            addPiece(new ChessPosition(7, i + 1), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+            addPiece(new ChessPosition(8, i + 1), new ChessPiece(ChessGame.TeamColor.BLACK, pieceOrder[i]));
         }
     }
 

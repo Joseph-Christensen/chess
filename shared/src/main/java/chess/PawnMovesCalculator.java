@@ -4,11 +4,12 @@ import java.util.Collection;
 import java.util.HashSet;
 
 public class PawnMovesCalculator {
+
     private final ChessBoard board;
     private final ChessPosition position;
     private final ChessPiece piece;
 
-    PawnMovesCalculator (ChessBoard board, ChessPosition position, ChessPiece piece) {
+    PawnMovesCalculator(ChessBoard board, ChessPosition position, ChessPiece piece) {
         this.board = board;
         this.position = position;
         this.piece = piece;
@@ -16,159 +17,160 @@ public class PawnMovesCalculator {
 
     public Collection<ChessMove> returnMoves() {
         var moves = new HashSet<ChessMove>();
-        ChessGame.TeamColor pieceColor = piece.getTeamColor();
+        ChessGame.TeamColor team = piece.getTeamColor();
         int initRow = position.getRow();
 
-        if (pieceColor == ChessGame.TeamColor.WHITE) {
-            // pawn is white, will be advancing in rows
-            if (initRow == 2) {
-                // 3 options, capture left, capture right, up 1 and 2
+        if (team == ChessGame.TeamColor.WHITE) {
+            // white pawn, moves up
+            if (initRow == 7) {
+                // promotion
                 for (int i = 0; i < 3; i++) {
-                    // runs though 3 times for each option
                     int row = position.getRow();
                     int col = position.getColumn();
+
                     if (i == 0) {
                         // capture left
-                        col--;
                         row++;
-                        if (col > 0 && row < 9) {
-                            if (board.getPiece(new ChessPosition(row, col)) != null) {
-                                ChessPiece currPiece = board.getPiece(new ChessPosition(row, col));
-                                if (pieceColor != currPiece.getTeamColor()) {
-                                    // valid capture
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                                }
+                        col--;
+                        if (row < 9 && col > 0) {
+                            // check for piece
+                            ChessPosition currPos = new ChessPosition(row, col);
+                            if (board.getPiece(currPos) != null && board.getPiece(currPos).getTeamColor() != team) {
+                                // can move
+                                moves.add(new ChessMove(position, currPos, ChessPiece.PieceType.KNIGHT));
+                                moves.add(new ChessMove(position, currPos, ChessPiece.PieceType.BISHOP));
+                                moves.add(new ChessMove(position, currPos, ChessPiece.PieceType.ROOK));
+                                moves.add(new ChessMove(position, currPos, ChessPiece.PieceType.QUEEN));
                             }
                         }
                     }
                     else if (i == 1) {
                         // capture right
-                        col++;
                         row++;
-                        if (col < 9 && row < 9) {
-                            if (board.getPiece(new ChessPosition(row, col)) != null) {
-                                ChessPiece currPiece = board.getPiece(new ChessPosition(row, col));
-                                if (pieceColor != currPiece.getTeamColor()) {
-                                    // valid capture
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                                }
+                        col++;
+                        if (row < 9 && col < 9) {
+                            // check for piece
+                            ChessPosition currPos = new ChessPosition(row, col);
+                            if (board.getPiece(currPos) != null && board.getPiece(currPos).getTeamColor() != team) {
+                                // can move
+                                moves.add(new ChessMove(position, currPos, ChessPiece.PieceType.KNIGHT));
+                                moves.add(new ChessMove(position, currPos, ChessPiece.PieceType.BISHOP));
+                                moves.add(new ChessMove(position, currPos, ChessPiece.PieceType.ROOK));
+                                moves.add(new ChessMove(position, currPos, ChessPiece.PieceType.QUEEN));
                             }
                         }
                     }
                     else {
-                        // up
+                        //move up one
                         row++;
                         if (row < 9) {
-                            if (board.getPiece(new ChessPosition(row, col)) == null) {
-                                // no piece detected
-                                moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                                // checking if up 2 is valid
-                                row++;
-                                if (board.getPiece(new ChessPosition(row, col)) == null) {
-                                    // both up 1 and up 2 valid
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                                }
+                            // check for piece
+                            ChessPosition currPos = new ChessPosition(row, col);
+                            if (board.getPiece(currPos) == null) {
+                                // can move
+                                moves.add(new ChessMove(position, currPos, ChessPiece.PieceType.KNIGHT));
+                                moves.add(new ChessMove(position, currPos, ChessPiece.PieceType.BISHOP));
+                                moves.add(new ChessMove(position, currPos, ChessPiece.PieceType.ROOK));
+                                moves.add(new ChessMove(position, currPos, ChessPiece.PieceType.QUEEN));
                             }
                         }
                     }
                 }
             }
-            else if (initRow == 7) {
-                // will promote, capture left, capture right, up 1, all with 4 promote options
+            else if (initRow == 2) {
+                // option to double move
                 for (int i = 0; i < 3; i++) {
-                    // runs though 3 times for each option
                     int row = position.getRow();
                     int col = position.getColumn();
+
                     if (i == 0) {
                         // capture left
-                        col--;
                         row++;
-                        if (col > 0 && row < 9) {
-                            if (board.getPiece(new ChessPosition(row, col)) != null) {
-                                ChessPiece currPiece = board.getPiece(new ChessPosition(row, col));
-                                if (pieceColor != currPiece.getTeamColor()) {
-                                    // valid capture
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), ChessPiece.PieceType.KNIGHT));
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), ChessPiece.PieceType.BISHOP));
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), ChessPiece.PieceType.ROOK));
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), ChessPiece.PieceType.QUEEN));
-                                }
+                        col--;
+                        if (row < 9 && col > 0) {
+                            // check for piece
+                            ChessPosition currPos = new ChessPosition(row, col);
+                            if (board.getPiece(currPos) != null && board.getPiece(currPos).getTeamColor() != team) {
+                                // can move
+                                moves.add(new ChessMove(position, currPos, null));
                             }
                         }
                     }
                     else if (i == 1) {
                         // capture right
-                        col++;
                         row++;
-                        if (col < 9 && row < 9) {
-                            if (board.getPiece(new ChessPosition(row, col)) != null) {
-                                ChessPiece currPiece = board.getPiece(new ChessPosition(row, col));
-                                if (pieceColor != currPiece.getTeamColor()) {
-                                    // valid capture
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), ChessPiece.PieceType.KNIGHT));
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), ChessPiece.PieceType.BISHOP));
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), ChessPiece.PieceType.ROOK));
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), ChessPiece.PieceType.QUEEN));
-                                }
+                        col++;
+                        if (row < 9 && col < 9) {
+                            // check for piece
+                            ChessPosition currPos = new ChessPosition(row, col);
+                            if (board.getPiece(currPos) != null && board.getPiece(currPos).getTeamColor() != team) {
+                                // can move
+                                moves.add(new ChessMove(position, currPos, null));
                             }
                         }
                     }
                     else {
-                        // up
+                        //move up one
                         row++;
                         if (row < 9) {
-                            if (board.getPiece(new ChessPosition(row, col)) == null) {
-                                // no piece detected
-                                moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), ChessPiece.PieceType.KNIGHT));
-                                moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), ChessPiece.PieceType.BISHOP));
-                                moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), ChessPiece.PieceType.ROOK));
-                                moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), ChessPiece.PieceType.QUEEN));
+                            // check for piece
+                            ChessPosition currPos = new ChessPosition(row, col);
+                            if (board.getPiece(currPos) == null) {
+                                // can move
+                                moves.add(new ChessMove(position, currPos, null));
+                                // check for a double move possibility
+                                row++;
+                                ChessPosition newPos = new ChessPosition(row, col);
+                                if (board.getPiece(newPos) == null) {
+                                    // add again
+                                    moves.add(new ChessMove(position, newPos, null));
+                                }
                             }
                         }
                     }
                 }
             }
             else {
-                // 3 options, capture left, capture right, up 1
+                // normal
                 for (int i = 0; i < 3; i++) {
-                    // runs though 3 times for each option
                     int row = position.getRow();
                     int col = position.getColumn();
+
                     if (i == 0) {
                         // capture left
-                        col--;
                         row++;
-                        if (col > 0 && row < 9) {
-                            if (board.getPiece(new ChessPosition(row, col)) != null) {
-                                ChessPiece currPiece = board.getPiece(new ChessPosition(row, col));
-                                if (pieceColor != currPiece.getTeamColor()) {
-                                    // valid capture
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                                }
+                        col--;
+                        if (row < 9 && col > 0) {
+                            // check for piece
+                            ChessPosition currPos = new ChessPosition(row, col);
+                            if (board.getPiece(currPos) != null && board.getPiece(currPos).getTeamColor() != team) {
+                                // can move
+                                moves.add(new ChessMove(position, currPos, null));
                             }
                         }
                     }
                     else if (i == 1) {
                         // capture right
-                        col++;
                         row++;
-                        if (col < 9 && row < 9) {
-                            if (board.getPiece(new ChessPosition(row, col)) != null) {
-                                ChessPiece currPiece = board.getPiece(new ChessPosition(row, col));
-                                if (pieceColor != currPiece.getTeamColor()) {
-                                    // valid capture
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                                }
+                        col++;
+                        if (row < 9 && col < 9) {
+                            // check for piece
+                            ChessPosition currPos = new ChessPosition(row, col);
+                            if (board.getPiece(currPos) != null && board.getPiece(currPos).getTeamColor() != team) {
+                                // can move
+                                moves.add(new ChessMove(position, currPos, null));
                             }
                         }
                     }
                     else {
-                        // up
+                        //move up one
                         row++;
                         if (row < 9) {
-                            if (board.getPiece(new ChessPosition(row, col)) == null) {
-                                // no piece detected
-                                moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
+                            // check for piece
+                            ChessPosition currPos = new ChessPosition(row, col);
+                            if (board.getPiece(currPos) == null) {
+                                // can move
+                                moves.add(new ChessMove(position, currPos, null));
                             }
                         }
                     }
@@ -176,155 +178,156 @@ public class PawnMovesCalculator {
             }
         }
         else {
-            // pawn is black, will be decreasing in rows
-            if (initRow == 7) {
-                // 3 options, capture left, capture right, down 1 and 2
+            // black pawn, moves down
+            if (initRow == 2) {
+                // promotion
                 for (int i = 0; i < 3; i++) {
-                    // runs though 3 times for each option
                     int row = position.getRow();
                     int col = position.getColumn();
+
                     if (i == 0) {
                         // capture left
-                        col--;
                         row--;
-                        if (col > 0 && row > 0) {
-                            if (board.getPiece(new ChessPosition(row, col)) != null) {
-                                ChessPiece currPiece = board.getPiece(new ChessPosition(row, col));
-                                if (pieceColor != currPiece.getTeamColor()) {
-                                    // valid capture
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                                }
+                        col--;
+                        if (row > 0 && col > 0) {
+                            // check for piece
+                            ChessPosition currPos = new ChessPosition(row, col);
+                            if (board.getPiece(currPos) != null && board.getPiece(currPos).getTeamColor() != team) {
+                                // can move
+                                moves.add(new ChessMove(position, currPos, ChessPiece.PieceType.KNIGHT));
+                                moves.add(new ChessMove(position, currPos, ChessPiece.PieceType.BISHOP));
+                                moves.add(new ChessMove(position, currPos, ChessPiece.PieceType.ROOK));
+                                moves.add(new ChessMove(position, currPos, ChessPiece.PieceType.QUEEN));
                             }
                         }
                     }
                     else if (i == 1) {
                         // capture right
-                        col++;
                         row--;
-                        if (col < 9 && row > 0) {
-                            if (board.getPiece(new ChessPosition(row, col)) != null) {
-                                ChessPiece currPiece = board.getPiece(new ChessPosition(row, col));
-                                if (pieceColor != currPiece.getTeamColor()) {
-                                    // valid capture
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                                }
+                        col++;
+                        if (row > 0 && col < 9) {
+                            // check for piece
+                            ChessPosition currPos = new ChessPosition(row, col);
+                            if (board.getPiece(currPos) != null && board.getPiece(currPos).getTeamColor() != team) {
+                                // can move
+                                moves.add(new ChessMove(position, currPos, ChessPiece.PieceType.KNIGHT));
+                                moves.add(new ChessMove(position, currPos, ChessPiece.PieceType.BISHOP));
+                                moves.add(new ChessMove(position, currPos, ChessPiece.PieceType.ROOK));
+                                moves.add(new ChessMove(position, currPos, ChessPiece.PieceType.QUEEN));
                             }
                         }
                     }
                     else {
-                        // down
+                        //move up one
                         row--;
-                        if (row < 9) {
-                            if (board.getPiece(new ChessPosition(row, col)) == null) {
-                                // no piece detected
-                                moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                                // checking if down 2 is valid
-                                row--;
-                                if (board.getPiece(new ChessPosition(row, col)) == null) {
-                                    // both down 1 and down 2 valid
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                                }
+                        if (row > 0) {
+                            // check for piece
+                            ChessPosition currPos = new ChessPosition(row, col);
+                            if (board.getPiece(currPos) == null) {
+                                // can move
+                                moves.add(new ChessMove(position, currPos, ChessPiece.PieceType.KNIGHT));
+                                moves.add(new ChessMove(position, currPos, ChessPiece.PieceType.BISHOP));
+                                moves.add(new ChessMove(position, currPos, ChessPiece.PieceType.ROOK));
+                                moves.add(new ChessMove(position, currPos, ChessPiece.PieceType.QUEEN));
                             }
                         }
                     }
                 }
             }
-            else if (initRow == 2) {
-                // will promote, capture left, capture right, down 1, all with 4 promote options
+            else if (initRow == 7) {
+                // option to double move
                 for (int i = 0; i < 3; i++) {
-                    // runs though 3 times for each option
                     int row = position.getRow();
                     int col = position.getColumn();
+
                     if (i == 0) {
                         // capture left
-                        col--;
                         row--;
-                        if (col > 0 && row > 0) {
-                            if (board.getPiece(new ChessPosition(row, col)) != null) {
-                                ChessPiece currPiece = board.getPiece(new ChessPosition(row, col));
-                                if (pieceColor != currPiece.getTeamColor()) {
-                                    // valid capture
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), ChessPiece.PieceType.KNIGHT));
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), ChessPiece.PieceType.BISHOP));
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), ChessPiece.PieceType.ROOK));
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), ChessPiece.PieceType.QUEEN));
-                                }
+                        col--;
+                        if (row > 0 && col > 0) {
+                            // check for piece
+                            ChessPosition currPos = new ChessPosition(row, col);
+                            if (board.getPiece(currPos) != null && board.getPiece(currPos).getTeamColor() != team) {
+                                // can move
+                                moves.add(new ChessMove(position, currPos, null));
                             }
                         }
                     }
                     else if (i == 1) {
                         // capture right
-                        col++;
                         row--;
-                        if (col < 9 && row > 0) {
-                            if (board.getPiece(new ChessPosition(row, col)) != null) {
-                                ChessPiece currPiece = board.getPiece(new ChessPosition(row, col));
-                                if (pieceColor != currPiece.getTeamColor()) {
-                                    // valid capture
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), ChessPiece.PieceType.KNIGHT));
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), ChessPiece.PieceType.BISHOP));
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), ChessPiece.PieceType.ROOK));
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), ChessPiece.PieceType.QUEEN));
-                                }
+                        col++;
+                        if (row > 0 && col < 9) {
+                            // check for piece
+                            ChessPosition currPos = new ChessPosition(row, col);
+                            if (board.getPiece(currPos) != null && board.getPiece(currPos).getTeamColor() != team) {
+                                // can move
+                                moves.add(new ChessMove(position, currPos, null));
                             }
                         }
                     }
                     else {
-                        // down
+                        //move up one
                         row--;
                         if (row > 0) {
-                            if (board.getPiece(new ChessPosition(row, col)) == null) {
-                                // no piece detected
-                                moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), ChessPiece.PieceType.KNIGHT));
-                                moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), ChessPiece.PieceType.BISHOP));
-                                moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), ChessPiece.PieceType.ROOK));
-                                moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), ChessPiece.PieceType.QUEEN));
+                            // check for piece
+                            ChessPosition currPos = new ChessPosition(row, col);
+                            if (board.getPiece(currPos) == null) {
+                                // can move
+                                moves.add(new ChessMove(position, currPos, null));
+                                // check for a double move possibility
+                                row--;
+                                ChessPosition newPos = new ChessPosition(row, col);
+                                if (board.getPiece(newPos) == null) {
+                                    // add again
+                                    moves.add(new ChessMove(position, newPos, null));
+                                }
                             }
                         }
                     }
                 }
             }
             else {
-                // 3 options, capture left, capture right, down 1
+                // normal
                 for (int i = 0; i < 3; i++) {
-                    // runs though 3 times for each option
                     int row = position.getRow();
                     int col = position.getColumn();
+
                     if (i == 0) {
                         // capture left
-                        col--;
                         row--;
-                        if (col > 0 && row > 0) {
-                            if (board.getPiece(new ChessPosition(row, col)) != null) {
-                                ChessPiece currPiece = board.getPiece(new ChessPosition(row, col));
-                                if (pieceColor != currPiece.getTeamColor()) {
-                                    // valid capture
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                                }
+                        col--;
+                        if (row > 0 && col > 0) {
+                            // check for piece
+                            ChessPosition currPos = new ChessPosition(row, col);
+                            if (board.getPiece(currPos) != null && board.getPiece(currPos).getTeamColor() != team) {
+                                // can move
+                                moves.add(new ChessMove(position, currPos, null));
                             }
                         }
                     }
                     else if (i == 1) {
                         // capture right
-                        col++;
                         row--;
-                        if (col < 9 && row > 0) {
-                            if (board.getPiece(new ChessPosition(row, col)) != null) {
-                                ChessPiece currPiece = board.getPiece(new ChessPosition(row, col));
-                                if (pieceColor != currPiece.getTeamColor()) {
-                                    // valid capture
-                                    moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                                }
+                        col++;
+                        if (row > 0 && col < 9) {
+                            // check for piece
+                            ChessPosition currPos = new ChessPosition(row, col);
+                            if (board.getPiece(currPos) != null && board.getPiece(currPos).getTeamColor() != team) {
+                                // can move
+                                moves.add(new ChessMove(position, currPos, null));
                             }
                         }
                     }
                     else {
-                        // down
+                        //move up one
                         row--;
                         if (row > 0) {
-                            if (board.getPiece(new ChessPosition(row, col)) == null) {
-                                // no piece detected
-                                moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
+                            // check for piece
+                            ChessPosition currPos = new ChessPosition(row, col);
+                            if (board.getPiece(currPos) == null) {
+                                // can move
+                                moves.add(new ChessMove(position, currPos, null));
                             }
                         }
                     }

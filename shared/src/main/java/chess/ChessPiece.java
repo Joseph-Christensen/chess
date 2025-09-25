@@ -53,7 +53,6 @@ public class ChessPiece {
      *
      * @return Collection of valid moves
      */
-
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         if (type == PieceType.BISHOP) {
             BishopMovesCalculator bishopCalc = new BishopMovesCalculator(board, myPosition, this);
@@ -63,6 +62,10 @@ public class ChessPiece {
             RookMovesCalculator rookCalc = new RookMovesCalculator(board, myPosition, this);
             return rookCalc.returnMoves();
         }
+        else if (type == PieceType.QUEEN) {
+            QueenMovesCalculator queenCalc = new QueenMovesCalculator(board, myPosition, this);
+            return queenCalc.returnMoves();
+        }
         else if (type == PieceType.KING) {
             KingMovesCalculator kingCalc = new KingMovesCalculator(board, myPosition, this);
             return kingCalc.returnMoves();
@@ -70,10 +73,6 @@ public class ChessPiece {
         else if (type == PieceType.KNIGHT) {
             KnightMovesCalculator knightCalc = new KnightMovesCalculator(board, myPosition, this);
             return knightCalc.returnMoves();
-        }
-        else if (type == PieceType.QUEEN) {
-            QueenMovesCalculator queenCalc = new QueenMovesCalculator(board, myPosition, this);
-            return queenCalc.returnMoves();
         }
         else {
             PawnMovesCalculator pawnCalc = new PawnMovesCalculator(board, myPosition, this);

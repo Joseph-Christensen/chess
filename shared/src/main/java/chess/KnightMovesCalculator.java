@@ -9,36 +9,46 @@ public class KnightMovesCalculator {
     private final ChessPosition position;
     private final ChessPiece piece;
 
-    KnightMovesCalculator (ChessBoard board, ChessPosition position, ChessPiece piece) {
+    KnightMovesCalculator(ChessBoard board, ChessPosition position, ChessPiece piece) {
         this.board = board;
         this.position = position;
         this.piece = piece;
     }
 
+    public ChessMove processMove(ChessPosition currPos, ChessGame.TeamColor team) {
+        if (board.getPiece(currPos) == null) {
+            // no piece
+            return new ChessMove(position, currPos, null);
+        }
+        else {
+            // piece detected
+            if (board.getPiece(currPos).getTeamColor() != team) {
+                // different team
+                return new ChessMove(position, currPos, null);
+            }
+        }
+        return null;
+    }
+
     public Collection<ChessMove> returnMoves() {
         var moves = new HashSet<ChessMove>();
-        ChessGame.TeamColor pieceColor = piece.getTeamColor();
+        ChessGame.TeamColor team = piece.getTeamColor();
+
         for (int i = 0; i < 8; i++) {
-            // runs though 8 times for each knight direction, left-up, up-left, up-right, right-up, right-down, down-right, down-left, left-down
+            // goes through 8 times for each direction
             int row = position.getRow();
             int col = position.getColumn();
+
             if (i == 0) {
                 // left-up
                 col--;
                 col--;
                 row++;
                 if (col > 0 && row < 9) {
-                    if (board.getPiece(new ChessPosition(row, col)) == null) {
-                        // keep going
-                        moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                    }
-                    else {
-                        // piece detected, check for color
-                        ChessPiece currPiece = board.getPiece(new ChessPosition(row, col));
-                        if (pieceColor != currPiece.getTeamColor()) {
-                            // different team
-                            moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                        }
+                    // continue
+                    ChessPosition currPos = new ChessPosition(row, col);
+                    if (processMove(currPos, team) != null) {
+                        moves.add(processMove(currPos, team));
                     }
                 }
             }
@@ -47,38 +57,24 @@ public class KnightMovesCalculator {
                 col--;
                 row++;
                 row++;
-                if ((col > 0) && (row < 9)) {
-                    if (board.getPiece(new ChessPosition(row, col)) == null) {
-                        // keep going
-                        moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                    }
-                    else {
-                        // piece detected, check for color
-                        ChessPiece currPiece = board.getPiece(new ChessPosition(row, col));
-                        if (pieceColor != currPiece.getTeamColor()) {
-                            // different team
-                            moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                        }
+                if (col > 0 && row < 9) {
+                    // continue
+                    ChessPosition currPos = new ChessPosition(row, col);
+                    if (processMove(currPos, team) != null) {
+                        moves.add(processMove(currPos, team));
                     }
                 }
             }
             else if (i == 2) {
                 // up-right
+                row++;
+                row++;
                 col++;
-                row++;
-                row++;
-                if (col < 9 && row < 9) {
-                    if (board.getPiece(new ChessPosition(row, col)) == null) {
-                        // keep going
-                        moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                    }
-                    else {
-                        // piece detected, check for color
-                        ChessPiece currPiece = board.getPiece(new ChessPosition(row, col));
-                        if (pieceColor != currPiece.getTeamColor()) {
-                            // different team
-                            moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                        }
+                if (row < 9 && col < 9) {
+                    // continue
+                    ChessPosition currPos = new ChessPosition(row, col);
+                    if (processMove(currPos, team) != null) {
+                        moves.add(processMove(currPos, team));
                     }
                 }
             }
@@ -88,17 +84,10 @@ public class KnightMovesCalculator {
                 col++;
                 row++;
                 if (col < 9 && row < 9) {
-                    if (board.getPiece(new ChessPosition(row, col)) == null) {
-                        // keep going
-                        moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                    }
-                    else {
-                        // piece detected, check for color
-                        ChessPiece currPiece = board.getPiece(new ChessPosition(row, col));
-                        if (pieceColor != currPiece.getTeamColor()) {
-                            // different team
-                            moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                        }
+                    // continue
+                    ChessPosition currPos = new ChessPosition(row, col);
+                    if (processMove(currPos, team) != null) {
+                        moves.add(processMove(currPos, team));
                     }
                 }
             }
@@ -108,37 +97,23 @@ public class KnightMovesCalculator {
                 col++;
                 row--;
                 if (col < 9 && row > 0) {
-                    if (board.getPiece(new ChessPosition(row, col)) == null) {
-                        // keep going
-                        moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                    }
-                    else {
-                        // piece detected, check for color
-                        ChessPiece currPiece = board.getPiece(new ChessPosition(row, col));
-                        if (pieceColor != currPiece.getTeamColor()) {
-                            // different team
-                            moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                        }
+                    // continue
+                    ChessPosition currPos = new ChessPosition(row, col);
+                    if (processMove(currPos, team) != null) {
+                        moves.add(processMove(currPos, team));
                     }
                 }
             }
             else if (i == 5) {
                 // down-right
+                row--;
+                row--;
                 col++;
-                row--;
-                row--;
-                if ((col < 9) && (row > 0)) {
-                    if (board.getPiece(new ChessPosition(row, col)) == null) {
-                        // keep going
-                        moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                    }
-                    else {
-                        // piece detected, check for color
-                        ChessPiece currPiece = board.getPiece(new ChessPosition(row, col));
-                        if (pieceColor != currPiece.getTeamColor()) {
-                            // different team
-                            moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                        }
+                if (col < 9 && row > 0) {
+                    // continue
+                    ChessPosition currPos = new ChessPosition(row, col);
+                    if (processMove(currPos, team) != null) {
+                        moves.add(processMove(currPos, team));
                     }
                 }
             }
@@ -147,18 +122,11 @@ public class KnightMovesCalculator {
                 row--;
                 row--;
                 col--;
-                if (col> 0 && row > 0) {
-                    if (board.getPiece(new ChessPosition(row, col)) == null) {
-                        // keep going
-                        moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                    }
-                    else {
-                        // piece detected, check for color
-                        ChessPiece currPiece = board.getPiece(new ChessPosition(row, col));
-                        if (pieceColor != currPiece.getTeamColor()) {
-                            // different team
-                            moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                        }
+                if (row > 0 && col > 0) {
+                    // continue
+                    ChessPosition currPos = new ChessPosition(row, col);
+                    if (processMove(currPos, team) != null) {
+                        moves.add(processMove(currPos, team));
                     }
                 }
             }
@@ -168,17 +136,10 @@ public class KnightMovesCalculator {
                 col--;
                 row--;
                 if (col > 0 && row > 0) {
-                    if (board.getPiece(new ChessPosition(row, col)) == null) {
-                        // keep going
-                        moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                    }
-                    else {
-                        // piece detected, check for color
-                        ChessPiece currPiece = board.getPiece(new ChessPosition(row, col));
-                        if (pieceColor != currPiece.getTeamColor()) {
-                            // different team
-                            moves.add(new ChessMove(new ChessPosition((position.getRow()), position.getColumn()), new ChessPosition(row, col), null));
-                        }
+                    // continue
+                    ChessPosition currPos = new ChessPosition(row, col);
+                    if (processMove(currPos, team) != null) {
+                        moves.add(processMove(currPos, team));
                     }
                 }
             }
