@@ -1,8 +1,9 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -12,12 +13,19 @@ import java.util.List;
  */
 public class ChessGame {
 
-    private ChessBoard myBoard = new ChessBoard();
-    private List<ChessPiece> blackPieces;
-    private List<ChessPiece> whitePieces;
+    private Map<ChessPiece, ChessPosition> whitePieces = new HashMap<>();
+    private Map<ChessPiece, ChessPosition> blackPieces = new HashMap<>();
+    private ChessBoard myBoard;
     private TeamColor teamTurn;
+    private ChessPosition whiteKing;
+    private ChessPosition blackKing;
 
-    public ChessGame() {}
+    public ChessGame() {
+        myBoard = new ChessBoard();
+        myBoard.resetBoard();
+        processBoardPieces();
+        teamTurn = TeamColor.WHITE;
+    }
 
     /**
      * @return Which team's turn it is
@@ -67,31 +75,61 @@ public class ChessGame {
         ChessPiece.PieceType promote = move.getPromotionPiece();
         ChessPiece myPiece = myBoard.getPiece(start);
 
+        if (myPiece == null) {
+            throw new InvalidMoveException("Not a Piece");
+        }
+
+        TeamColor color = myPiece.getTeamColor();
+
         var legalMoves = validMoves(start);
         if (!legalMoves.contains(move)) {
             throw new InvalidMoveException("Invalid Move: " + move);
         }
 
+        // check to see if there was a piece there
+        ChessPiece destinationPiece = myBoard.getPiece(end);
+        if (destinationPiece != null) {
+            if (color == TeamColor.WHITE) {
+                whitePieces.remove(destinationPiece);
+            }
+            else {
+                blackPieces.remove(destinationPiece);
+            }
+        }
+
+
+        myBoard.addPiece(start, null);
         if (promote == null) {
             // not a promotion
-            myBoard.addPiece(start, null);
             myBoard.addPiece(end, myPiece);
+            if (color == TeamColor.WHITE) {
+                // white
+                whitePieces.put(myPiece, end);
+                if (myPiece.getPieceType() == ChessPiece.PieceType.KING) {
+                    whiteKing = end;
+                }
+            }
+            else {
+                // black
+                blackPieces.put(myPiece, end);
+                if (myPiece.getPieceType() == ChessPiece.PieceType.KING) {
+                    blackKing = end;
+                }
+            }
         }
         else {
             // promotion
-            TeamColor color = myPiece.getTeamColor();
-            myBoard.addPiece(start, null);
             ChessPiece newPiece = new ChessPiece(color, promote);
             myBoard.addPiece(end, newPiece);
             if (color == TeamColor.WHITE) {
                 // white
                 whitePieces.remove(myPiece);
-                whitePieces.add(newPiece);
+                whitePieces.put(newPiece, end);
             }
             else {
                 // black
                 blackPieces.remove(myPiece);
-                blackPieces.add(newPiece);
+                blackPieces.put(newPiece, end);
             }
         }
     }
@@ -103,7 +141,31 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        HashSet<ChessPosition> coveredPositions = new HashSet<ChessPosition>();
+        if (teamColor == TeamColor.WHITE) {
+            // white
+            for (Map.Entry<ChessPiece, ChessPosition> entry : blackPieces.entrySet()) {
+                ChessPiece currPiece = entry.getKey();
+                ChessPosition currPos = entry.getValue();
+                var currMoves = currPiece.pieceMoves(myBoard, currPos);
+                for (ChessMove move : currMoves) {
+                    coveredPositions.add(move.getEndPosition());
+                }
+            }
+            return coveredPositions.contains(whiteKing);
+        }
+        else {
+            // black
+            for (Map.Entry<ChessPiece, ChessPosition> entry : whitePieces.entrySet()) {
+                ChessPiece currPiece = entry.getKey();
+                ChessPosition currPos = entry.getValue();
+                var currMoves = currPiece.pieceMoves(myBoard, currPos);
+                for (ChessMove move : currMoves) {
+                    coveredPositions.add(move.getEndPosition());
+                }
+            }
+            return coveredPositions.contains(blackKing);
+        }
     }
 
     /**
@@ -137,23 +199,6 @@ public class ChessGame {
         processBoardPieces();
     }
 
-    private void processBoardPieces() {
-        whitePieces.clear();
-        blackPieces.clear();
-        for (int i = 1; i < 9; i++) {
-            for (int j = 1; j < 9; j++) {
-                ChessPiece currPiece = myBoard.getPiece(new ChessPosition(i, j));
-                TeamColor color = currPiece.getTeamColor();
-                if (color == TeamColor.WHITE) {
-                    whitePieces.add(currPiece);
-                }
-                else {
-                    blackPieces.add(currPiece);
-                }
-            }
-        }
-    }
-
     /**
      * Gets the current chessboard
      *
@@ -161,6 +206,33 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return myBoard;
+    }
+
+    private void processBoardPieces() {
+        whitePieces.clear();
+        blackPieces.clear();
+        for (int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; j++) {
+                ChessPosition currPos = new ChessPosition(i, j);
+                ChessPiece currPiece = myBoard.getPiece(currPos);
+                if (currPiece == null) {
+                    continue;
+                }
+                TeamColor color = currPiece.getTeamColor();
+                if (color == TeamColor.WHITE) {
+                    whitePieces.put(currPiece, currPos);
+                    if (currPiece.getPieceType() == ChessPiece.PieceType.KING) {
+                        whiteKing = currPos;
+                    }
+                }
+                else {
+                    blackPieces.put(currPiece, currPos);
+                    if (currPiece.getPieceType() == ChessPiece.PieceType.KING) {
+                        blackKing = currPos;
+                    }
+                }
+            }
+        }
     }
 
     @Override
