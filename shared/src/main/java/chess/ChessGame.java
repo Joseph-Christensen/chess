@@ -79,11 +79,11 @@ public class ChessGame {
         }
         else {
             // promotion
-            TeamColor team = myPiece.getTeamColor();
+            TeamColor color = myPiece.getTeamColor();
             myBoard.addPiece(start, null);
-            ChessPiece newPiece = new ChessPiece(team, promote);
+            ChessPiece newPiece = new ChessPiece(color, promote);
             myBoard.addPiece(end, newPiece);
-            if (team == TeamColor.WHITE) {
+            if (color == TeamColor.WHITE) {
                 // white
                 whitePieces.remove(myPiece);
                 whitePieces.add(newPiece);
@@ -134,6 +134,24 @@ public class ChessGame {
      */
     public void setBoard(ChessBoard board) {
         myBoard = board;
+        processBoardPieces();
+    }
+
+    private void processBoardPieces() {
+        whitePieces.clear();
+        blackPieces.clear();
+        for (int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; j++) {
+                ChessPiece currPiece = myBoard.getPiece(new ChessPosition(i, j));
+                TeamColor color = currPiece.getTeamColor();
+                if (color == TeamColor.WHITE) {
+                    whitePieces.add(currPiece);
+                }
+                else {
+                    blackPieces.add(currPiece);
+                }
+            }
+        }
     }
 
     /**
