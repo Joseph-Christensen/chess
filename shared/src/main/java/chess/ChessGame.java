@@ -1,6 +1,8 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -11,8 +13,8 @@ import java.util.Collection;
 public class ChessGame {
 
     private ChessBoard myBoard = new ChessBoard();
-    private ChessPiece[] blackPieces;
-    private ChessPiece[] whitePieces;
+    private List<ChessPiece> blackPieces;
+    private List<ChessPiece> whitePieces;
     private TeamColor teamTurn;
 
     public ChessGame() {}
@@ -49,7 +51,8 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        var moves = new HashSet<ChessMove>();
+        return moves;
     }
 
     /**
@@ -59,7 +62,38 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessPosition start = move.getStartPosition();
+        ChessPosition end = move.getEndPosition();
+        ChessPiece.PieceType promote = move.getPromotionPiece();
+        ChessPiece myPiece = myBoard.getPiece(start);
+
+        var legalMoves = validMoves(start);
+        if (!legalMoves.contains(move)) {
+            throw new InvalidMoveException("Invalid Move: " + move);
+        }
+
+        if (promote == null) {
+            // not a promotion
+            myBoard.addPiece(start, null);
+            myBoard.addPiece(end, myPiece);
+        }
+        else {
+            // promotion
+            TeamColor team = myPiece.getTeamColor();
+            myBoard.addPiece(start, null);
+            ChessPiece newPiece = new ChessPiece(team, promote);
+            myBoard.addPiece(end, newPiece);
+            if (team == TeamColor.WHITE) {
+                // white
+                whitePieces.remove(myPiece);
+                whitePieces.add(newPiece);
+            }
+            else {
+                // black
+                blackPieces.remove(myPiece);
+                blackPieces.add(newPiece);
+            }
+        }
     }
 
     /**
