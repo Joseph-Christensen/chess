@@ -24,7 +24,7 @@ public class ChessGame {
         myBoard = new ChessBoard();
         myBoard.resetBoard();
         processBoardPieces();
-        teamTurn = TeamColor.WHITE;
+        setTeamTurn(TeamColor.WHITE);
     }
 
     /**
@@ -63,12 +63,40 @@ public class ChessGame {
         // making a copy board so I can make changes to myBoard and it won't affect the game
         var legalMoves = new HashSet<ChessMove>();
         ChessPiece myPiece = myBoard.getPiece(startPosition);
+        TeamColor team = myPiece.getTeamColor();
         var moves = myPiece.pieceMoves(myBoard, startPosition);
 
         for (ChessMove move : moves) {
             ChessPosition start = move.getStartPosition();
             ChessPosition end = move.getEndPosition();
 
+            ChessPiece destinationPiece = myBoard.getPiece(end);
+
+            myBoard.addPiece(end, myPiece);
+            myBoard.addPiece(start, null);
+
+            if (destinationPiece != null) {
+                if (team == TeamColor.WHITE) {
+                    blackPieces.remove(destinationPiece);
+                    if (!isInCheck(team)) {
+                        legalMoves.add(move);
+                    }
+                    blackPieces.put(destinationPiece, end);
+                }
+                else {
+                    whitePieces.remove(destinationPiece);
+                    if (!isInCheck(team)) {
+                        legalMoves.add(move);
+                    }
+                    whitePieces.put(destinationPiece, end);
+                }
+            }
+            else {
+                if (!isInCheck(team)) {
+                    legalMoves.add(move);
+                }
+            }
+            myBoard = copyBoard.copy();
         }
         return legalMoves;
     }
@@ -84,12 +112,11 @@ public class ChessGame {
         ChessPosition end = move.getEndPosition();
         ChessPiece.PieceType promote = move.getPromotionPiece();
         ChessPiece myPiece = myBoard.getPiece(start);
+        TeamColor color = getTeamTurn();
 
         if (myPiece == null) {
             throw new InvalidMoveException("Not a Piece");
         }
-
-        TeamColor color = myPiece.getTeamColor();
 
         var legalMoves = validMoves(start);
         if (!legalMoves.contains(move)) {
@@ -142,6 +169,12 @@ public class ChessGame {
                 blackPieces.put(newPiece, end);
             }
         }
+        if (color == TeamColor.WHITE) {
+            setTeamTurn(TeamColor.BLACK);
+        }
+        else {
+            setTeamTurn(TeamColor.WHITE);
+        }
     }
 
     /**
@@ -151,7 +184,7 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        HashSet<ChessPosition> coveredPositions = new HashSet<ChessPosition>();
+        var coveredPositions = new HashSet<ChessPosition>();
         if (teamColor == TeamColor.WHITE) {
             // white
             for (Map.Entry<ChessPiece, ChessPosition> entry : blackPieces.entrySet()) {
