@@ -19,6 +19,10 @@ public class ChessPiece {
         this.type = type;
     }
 
+    public ChessPiece copy() {
+        return new ChessPiece(pieceColor, type);
+    }
+
     /**
      * The various different chess piece options
      */

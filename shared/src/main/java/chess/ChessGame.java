@@ -59,8 +59,18 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        var moves = new HashSet<ChessMove>();
-        return moves;
+        ChessBoard copyBoard = myBoard.copy();
+        // making a copy board so I can make changes to myBoard and it won't affect the game
+        var legalMoves = new HashSet<ChessMove>();
+        ChessPiece myPiece = myBoard.getPiece(startPosition);
+        var moves = myPiece.pieceMoves(myBoard, startPosition);
+
+        for (ChessMove move : moves) {
+            ChessPosition start = move.getStartPosition();
+            ChessPosition end = move.getEndPosition();
+
+        }
+        return legalMoves;
     }
 
     /**

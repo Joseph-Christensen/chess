@@ -14,6 +14,21 @@ public class ChessBoard {
 
     public ChessBoard() {}
 
+    public ChessBoard copy() {
+        // constructor to make an exact copy of the board
+        ChessBoard newBoard = new ChessBoard();
+        for (int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; j++) {
+                ChessPosition position = new ChessPosition(i, j);
+                ChessPiece piece = this.getPiece(position);
+                if (piece != null) {
+                    newBoard.addPiece(position, piece.copy());
+                }
+            }
+        }
+        return newBoard;
+    }
+
     /**
      * Adds a chess piece to the chessboard
      *
