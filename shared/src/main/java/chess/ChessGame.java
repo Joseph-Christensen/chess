@@ -204,7 +204,35 @@ public class ChessGame {
      * @param teamColor which team to check for checkmate
      * @return True if the specified team is in checkmate
      */
-
+    public boolean isInCheckmate(TeamColor teamColor) {
+        var legalMoves = new HashSet<ChessMove>();
+        if (teamColor == TeamColor.WHITE) {
+            // white
+            for (int i = 1; i < 9; i++) {
+                for (int j = 1; j < 9; j++) {
+                    ChessPosition currPos = new ChessPosition(i, j);
+                    ChessPiece currPiece = myBoard.getPiece(currPos);
+                    if ((currPiece != null) && (currPiece.getTeamColor() == TeamColor.WHITE)) {
+                        legalMoves.addAll(validMoves(currPos));
+                    }
+                }
+            }
+            return legalMoves.isEmpty();
+        }
+        else {
+            // black
+            for (int i = 1; i < 9; i++) {
+                for (int j = 1; j < 9; j++) {
+                    ChessPosition currPos = new ChessPosition(i, j);
+                    ChessPiece currPiece = myBoard.getPiece(currPos);
+                    if ((currPiece != null) && (currPiece.getTeamColor() == TeamColor.BLACK)) {
+                        legalMoves.addAll(validMoves(currPos));
+                    }
+                }
+            }
+            return legalMoves.isEmpty();
+        }
+    }
     /**
      * Determines if the given team is in stalemate, which here is defined as having
      * no valid moves while not in check.
