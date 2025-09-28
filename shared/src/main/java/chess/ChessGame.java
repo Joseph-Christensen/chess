@@ -65,8 +65,6 @@ public class ChessGame {
             ChessPosition start = move.getStartPosition();
             ChessPosition end = move.getEndPosition();
 
-            ChessPiece destinationPiece = myBoard.getPiece(end);
-
             myBoard.addPiece(end, myPiece);
             myBoard.addPiece(start, null);
 
