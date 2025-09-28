@@ -13,8 +13,6 @@ import java.util.Map;
  */
 public class ChessGame {
 
-    private Map<ChessPiece, ChessPosition> whitePieces = new HashMap<>();
-    private Map<ChessPiece, ChessPosition> blackPieces = new HashMap<>();
     private ChessBoard myBoard;
     private TeamColor teamTurn;
     private ChessPosition whiteKing;
@@ -23,7 +21,7 @@ public class ChessGame {
     public ChessGame() {
         myBoard = new ChessBoard();
         myBoard.resetBoard();
-        processBoardPieces();
+        findKings();
         setTeamTurn(TeamColor.WHITE);
     }
 
@@ -84,26 +82,8 @@ public class ChessGame {
                 }
             }
 
-            if (destinationPiece != null) {
-                if (team == TeamColor.WHITE) {
-                    blackPieces.remove(destinationPiece);
-                    if (!isInCheck(team)) {
-                        legalMoves.add(move);
-                    }
-                    blackPieces.put(destinationPiece, end);
-                }
-                else {
-                    whitePieces.remove(destinationPiece);
-                    if (!isInCheck(team)) {
-                        legalMoves.add(move);
-                    }
-                    whitePieces.put(destinationPiece, end);
-                }
-            }
-            else {
-                if (!isInCheck(team)) {
-                    legalMoves.add(move);
-                }
+            if (!isInCheck(team)) {
+                legalMoves.add(move);
             }
 
             if (myPiece.getPieceType() == ChessPiece.PieceType.KING) {
@@ -147,32 +127,16 @@ public class ChessGame {
         }
 
         // check to see if there was a piece there
-        ChessPiece destinationPiece = myBoard.getPiece(end);
-        if (destinationPiece != null) {
-            if (color == TeamColor.WHITE) {
-                whitePieces.remove(destinationPiece);
-            }
-            else {
-                blackPieces.remove(destinationPiece);
-            }
-        }
-
 
         myBoard.addPiece(start, null);
         if (promote == null) {
             // not a promotion
             myBoard.addPiece(end, myPiece);
-            if (color == TeamColor.WHITE) {
-                // white
-                whitePieces.put(myPiece, end);
-                if (myPiece.getPieceType() == ChessPiece.PieceType.KING) {
+            if (myPiece.getPieceType() == ChessPiece.PieceType.KING) {
+                if (color == TeamColor.WHITE) {
                     whiteKing = end;
                 }
-            }
-            else {
-                // black
-                blackPieces.put(myPiece, end);
-                if (myPiece.getPieceType() == ChessPiece.PieceType.KING) {
+                else {
                     blackKing = end;
                 }
             }
@@ -181,16 +145,6 @@ public class ChessGame {
             // promotion
             ChessPiece newPiece = new ChessPiece(color, promote);
             myBoard.addPiece(end, newPiece);
-            if (color == TeamColor.WHITE) {
-                // white
-                whitePieces.remove(myPiece);
-                whitePieces.put(newPiece, end);
-            }
-            else {
-                // black
-                blackPieces.remove(myPiece);
-                blackPieces.put(newPiece, end);
-            }
         }
         if (color == TeamColor.WHITE) {
             setTeamTurn(TeamColor.BLACK);
@@ -210,24 +164,34 @@ public class ChessGame {
         var coveredPositions = new HashSet<ChessPosition>();
         if (teamColor == TeamColor.WHITE) {
             // white
-            for (Map.Entry<ChessPiece, ChessPosition> entry : blackPieces.entrySet()) {
-                ChessPiece currPiece = entry.getKey();
-                ChessPosition currPos = entry.getValue();
-                var currMoves = currPiece.pieceMoves(myBoard, currPos);
-                for (ChessMove move : currMoves) {
-                    coveredPositions.add(move.getEndPosition());
+            for (int i = 1; i < 9; i++) {
+                for (int j = 1; j < 9; j++) {
+                    ChessPosition currPosition = new ChessPosition(i, j);
+                    ChessPiece currPiece = myBoard.getPiece(currPosition);
+                    if ((currPiece != null) && (currPiece.getTeamColor() == TeamColor.BLACK)) {
+                        // is a black piece
+                        var moves = currPiece.pieceMoves(myBoard, currPosition);
+                        for (ChessMove move : moves) {
+                            coveredPositions.add(move.getEndPosition());
+                        }
+                    }
                 }
             }
             return coveredPositions.contains(whiteKing);
         }
         else {
             // black
-            for (Map.Entry<ChessPiece, ChessPosition> entry : whitePieces.entrySet()) {
-                ChessPiece currPiece = entry.getKey();
-                ChessPosition currPos = entry.getValue();
-                var currMoves = currPiece.pieceMoves(myBoard, currPos);
-                for (ChessMove move : currMoves) {
-                    coveredPositions.add(move.getEndPosition());
+            for (int i = 1; i < 9; i++) {
+                for (int j = 1; j < 9; j++) {
+                    ChessPosition currPosition = new ChessPosition(i, j);
+                    ChessPiece currPiece = myBoard.getPiece(currPosition);
+                    if ((currPiece != null) && (currPiece.getTeamColor() == TeamColor.WHITE)) {
+                        // is a white piece
+                        var moves = currPiece.pieceMoves(myBoard, currPosition);
+                        for (ChessMove move : moves) {
+                            coveredPositions.add(move.getEndPosition());
+                        }
+                    }
                 }
             }
             return coveredPositions.contains(blackKing);
@@ -262,7 +226,25 @@ public class ChessGame {
      */
     public void setBoard(ChessBoard board) {
         myBoard = board;
-        processBoardPieces();
+        findKings();
+    }
+
+    private void findKings() {
+        for (int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; j++) {
+                ChessPosition currPosition = new ChessPosition(i, j);
+                ChessPiece currPiece = myBoard.getPiece(currPosition);
+
+                if ((currPiece != null) && (currPiece.getPieceType() == ChessPiece.PieceType.KING)) {
+                    if (currPiece.getTeamColor() == TeamColor.WHITE) {
+                        whiteKing = currPosition;
+                    }
+                    else {
+                        blackKing = currPosition;
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -272,33 +254,6 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return myBoard;
-    }
-
-    private void processBoardPieces() {
-        whitePieces.clear();
-        blackPieces.clear();
-        for (int i = 1; i < 9; i++) {
-            for (int j = 1; j < 9; j++) {
-                ChessPosition currPos = new ChessPosition(i, j);
-                ChessPiece currPiece = myBoard.getPiece(currPos);
-                if (currPiece == null) {
-                    continue;
-                }
-                TeamColor color = currPiece.getTeamColor();
-                if (color == TeamColor.WHITE) {
-                    whitePieces.put(currPiece, currPos);
-                    if (currPiece.getPieceType() == ChessPiece.PieceType.KING) {
-                        whiteKing = currPos;
-                    }
-                }
-                else {
-                    blackPieces.put(currPiece, currPos);
-                    if (currPiece.getPieceType() == ChessPiece.PieceType.KING) {
-                        blackKing = currPos;
-                    }
-                }
-            }
-        }
     }
 
     @Override
