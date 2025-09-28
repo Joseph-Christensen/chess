@@ -75,6 +75,15 @@ public class ChessGame {
             myBoard.addPiece(end, myPiece);
             myBoard.addPiece(start, null);
 
+            if (myPiece.getPieceType() == ChessPiece.PieceType.KING) {
+                if (team == TeamColor.WHITE) {
+                    whiteKing = end;
+                }
+                else {
+                    blackKing = end;
+                }
+            }
+
             if (destinationPiece != null) {
                 if (team == TeamColor.WHITE) {
                     blackPieces.remove(destinationPiece);
@@ -96,6 +105,16 @@ public class ChessGame {
                     legalMoves.add(move);
                 }
             }
+
+            if (myPiece.getPieceType() == ChessPiece.PieceType.KING) {
+                if (team == TeamColor.WHITE) {
+                    whiteKing = start;
+                }
+                else {
+                    blackKing = start;
+                }
+            }
+
             myBoard = copyBoard.copy();
         }
         return legalMoves;
@@ -116,6 +135,10 @@ public class ChessGame {
 
         if (myPiece == null) {
             throw new InvalidMoveException("Not a Piece");
+        }
+
+        if (myPiece.getTeamColor() != color) {
+            throw new InvalidMoveException("Wrong Turn");
         }
 
         var legalMoves = validMoves(start);
