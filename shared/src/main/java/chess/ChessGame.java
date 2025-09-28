@@ -204,9 +204,6 @@ public class ChessGame {
      * @param teamColor which team to check for checkmate
      * @return True if the specified team is in checkmate
      */
-    public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
-    }
 
     /**
      * Determines if the given team is in stalemate, which here is defined as having
