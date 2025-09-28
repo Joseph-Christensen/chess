@@ -1,9 +1,6 @@
 package chess;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -290,12 +287,21 @@ public class ChessGame {
     }
 
     @Override
-    public int hashCode() {
-        return super.hashCode();
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        ChessGame chessGame = (ChessGame) o;
+        return Objects.equals(myBoard, chessGame.myBoard) && teamTurn == chessGame.teamTurn && Objects.equals(whiteKing, chessGame.whiteKing) && Objects.equals(blackKing, chessGame.blackKing);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return super.equals(obj);
+    public int hashCode() {
+        int result = Objects.hashCode(myBoard);
+        result = 31 * result + Objects.hashCode(teamTurn);
+        result = 31 * result + Objects.hashCode(whiteKing);
+        result = 31 * result + Objects.hashCode(blackKing);
+        return result;
     }
 }
