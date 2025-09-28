@@ -205,33 +205,10 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        var legalMoves = new HashSet<ChessMove>();
-        if (teamColor == TeamColor.WHITE) {
-            // white
-            for (int i = 1; i < 9; i++) {
-                for (int j = 1; j < 9; j++) {
-                    ChessPosition currPos = new ChessPosition(i, j);
-                    ChessPiece currPiece = myBoard.getPiece(currPos);
-                    if ((currPiece != null) && (currPiece.getTeamColor() == TeamColor.WHITE)) {
-                        legalMoves.addAll(validMoves(currPos));
-                    }
-                }
-            }
-            return legalMoves.isEmpty();
+        if (isInCheck(teamColor)) {
+            return anyValidMoves(teamColor);
         }
-        else {
-            // black
-            for (int i = 1; i < 9; i++) {
-                for (int j = 1; j < 9; j++) {
-                    ChessPosition currPos = new ChessPosition(i, j);
-                    ChessPiece currPiece = myBoard.getPiece(currPos);
-                    if ((currPiece != null) && (currPiece.getTeamColor() == TeamColor.BLACK)) {
-                        legalMoves.addAll(validMoves(currPos));
-                    }
-                }
-            }
-            return legalMoves.isEmpty();
-        }
+        return false;
     }
     /**
      * Determines if the given team is in stalemate, which here is defined as having
@@ -241,7 +218,10 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if (!isInCheck(teamColor)) {
+            return anyValidMoves(teamColor);
+        }
+        return false;
     }
 
     /**
@@ -270,6 +250,34 @@ public class ChessGame {
                 }
             }
         }
+    }
+
+    private boolean anyValidMoves(TeamColor teamColor) {
+        var legalMoves = new HashSet<ChessMove>();
+        if (teamColor == TeamColor.WHITE) {
+            // white
+            for (int i = 1; i < 9; i++) {
+                for (int j = 1; j < 9; j++) {
+                    ChessPosition currPos = new ChessPosition(i, j);
+                    ChessPiece currPiece = myBoard.getPiece(currPos);
+                    if ((currPiece != null) && (currPiece.getTeamColor() == TeamColor.WHITE)) {
+                        legalMoves.addAll(validMoves(currPos));
+                    }
+                }
+            }
+        } else {
+            // black
+            for (int i = 1; i < 9; i++) {
+                for (int j = 1; j < 9; j++) {
+                    ChessPosition currPos = new ChessPosition(i, j);
+                    ChessPiece currPiece = myBoard.getPiece(currPos);
+                    if ((currPiece != null) && (currPiece.getTeamColor() == TeamColor.BLACK)) {
+                        legalMoves.addAll(validMoves(currPos));
+                    }
+                }
+            }
+        }
+        return legalMoves.isEmpty();
     }
 
     /**
