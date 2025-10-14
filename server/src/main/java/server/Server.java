@@ -3,6 +3,8 @@ package server;
 import com.google.gson.Gson;
 import io.javalin.*;
 import io.javalin.http.Context;
+import model.UserData;
+
 import java.util.Map;
 
 public class Server {
@@ -20,11 +22,12 @@ public class Server {
     private void register(Context ctx) {
         var serializer = new Gson();
         String reqJson = ctx.body();
-        var req = serializer.fromJson(reqJson, Map.class);
+        // String auth = ctx.header();
+        var req = serializer.fromJson(reqJson, UserData.class);
 
         // call to the service and register
 
-        var res = Map.of("username", req.get("username"), "authToken", "yzx");
+        var res = Map.of("username", req.username(), "authToken", "yzx");
         ctx.result(serializer.toJson(res));
     }
 
