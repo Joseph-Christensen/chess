@@ -3,6 +3,7 @@ package server;
 import com.google.gson.Gson;
 import io.javalin.*;
 import io.javalin.http.Context;
+import model.AuthData;
 import model.UserData;
 
 import java.util.Map;
@@ -17,6 +18,8 @@ public class Server {
         server.delete("db", ctx -> ctx.result("{}"));
 
         server.post("user", ctx -> register(ctx));
+
+        server.post("session", ctx -> login(ctx));
     }
 
     private void register(Context ctx) {
@@ -28,6 +31,15 @@ public class Server {
         // call to the service and register
 
         var res = Map.of("username", req.username(), "authToken", "yzx");
+        ctx.result(serializer.toJson(res));
+    }
+
+    private void login(Context ctx) {
+        var serializer = new Gson();
+        String reqJson = ctx.body();
+        var req = serializer.fromJson(reqJson, AuthData.class);
+
+        var res = Map.of("username", req.username(), "authToken", "xyz");
         ctx.result(serializer.toJson(res));
     }
 
