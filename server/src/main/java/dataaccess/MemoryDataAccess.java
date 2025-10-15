@@ -38,8 +38,18 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
+    public void removeAuth(String username) {
+        auths.remove(username);
+    }
+
+    @Override
     public String getPassword(String username) {
         return getUser(username).password();
+    }
+
+    @Override
+    public HashMap<String, AuthData> allAuths() {
+        return auths;
     }
 
 

@@ -3,6 +3,8 @@ package service;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import model.*;
+
+import java.util.Map;
 import java.util.UUID;
 
 public class UserService {
@@ -35,6 +37,21 @@ public class UserService {
         }
         dataAccess.createAuth(new AuthData(user.username(), generateAuthToken()));
         return dataAccess.getAuth(user.username());
+    }
+
+    public void logout(String authToken) throws Exception {
+        boolean match = false;
+        var myAuths = dataAccess.allAuths();
+        for (Map.Entry<String, AuthData> entry : myAuths.entrySet()) {
+            if (entry.getValue().authToken().equals(authToken)) {
+                match = true;
+                dataAccess.removeAuth(entry.getKey());
+                break; // stop once found
+            }
+        }
+        if (!match) {
+            throw new Exception("unauthorized");
+        }
     }
 
     private String generateAuthToken() {

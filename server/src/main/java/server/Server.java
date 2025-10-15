@@ -24,9 +24,8 @@ public class Server {
         server.delete("db", ctx -> clear(ctx));
         server.post("user", ctx -> register(ctx));
         server.post("session", ctx -> login(ctx));
+        server.delete("session", ctx -> logout(ctx));
     }
-
-    // String auth = ctx.header();
 
     private void clear(Context ctx) {
         userService.clear();
@@ -57,6 +56,19 @@ public class Server {
             var authData = userService.login(user);
 
             ctx.result(serializer.toJson(authData));
+        } catch (Exception ex) {
+            var msg = String.format("{ \"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(401).result(msg);
+        }
+    }
+
+    private void logout(Context ctx) {
+        try {
+            String authToken = ctx.header("authorization");
+
+            userService.logout(authToken);
+
+            ctx.result("{}");
         } catch (Exception ex) {
             var msg = String.format("{ \"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(401).result(msg);
