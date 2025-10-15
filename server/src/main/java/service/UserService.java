@@ -15,12 +15,17 @@ public class UserService {
         this.dataAccess = dataAccess;
     }
 
+    public void clear() {
+        dataAccess.clear();
+    }
+
     public AuthData register(UserData user) throws Exception {
         if (dataAccess.getUser(user.username()) != null) {
             throw new Exception("already exists");
         }
         dataAccess.createUser(user);
-        return new AuthData(user.username(), generateAuthToken());
+        dataAccess.createAuth(new AuthData(user.username(), generateAuthToken()));
+        return dataAccess.getAuth(user.username());
     }
 
     private String generateAuthToken() {

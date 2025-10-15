@@ -22,14 +22,17 @@ public class Server {
 
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
-        server.delete("db", ctx -> ctx.result("{}"));
-
+        server.delete("db", ctx -> clear(ctx));
         server.post("user", ctx -> register(ctx));
-
         server.post("session", ctx -> login(ctx));
     }
 
     // String auth = ctx.header();
+
+    private void clear(Context ctx) {
+        userService.clear();
+        ctx.result("{}");
+    }
 
     private void register(Context ctx) {
         try {
@@ -40,8 +43,7 @@ public class Server {
             var authData = userService.register(user);
 
             ctx.result(serializer.toJson(authData));
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             var msg = String.format("{ \"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(403).result(msg);
         }
