@@ -5,8 +5,7 @@ import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
 import io.javalin.*;
 import io.javalin.http.Context;
-import model.AuthData;
-import model.UserData;
+import model.*;
 import service.UserService;
 
 import java.util.Map;
@@ -50,14 +49,18 @@ public class Server {
     }
 
     private void login(Context ctx) {
-        var serializer = new Gson();
-        String reqJson = ctx.body();
-        var req = serializer.fromJson(reqJson, UserData.class);
+        try {
+            var serializer = new Gson();
+            String reqJson = ctx.body();
+            var user = serializer.fromJson(reqJson, LoginInfo.class);
 
-        // call to the service and login
+            var authData = userService.login(user);
 
-        var res = Map.of("username", req.username(), "authToken", "xyz");
-        ctx.result(serializer.toJson(res));
+            ctx.result(serializer.toJson(authData));
+        } catch (Exception ex) {
+            var msg = String.format("{ \"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(401).result(msg);
+        }
     }
 
     public int run(int desiredPort) {

@@ -37,5 +37,10 @@ public class MemoryDataAccess implements DataAccess {
         return auths.get(username);
     }
 
+    @Override
+    public String getPassword(String username) {
+        return getUser(username).password();
+    }
+
 
 }
