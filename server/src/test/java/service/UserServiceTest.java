@@ -2,6 +2,7 @@ package service;
 
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
+import model.LoginInfo;
 import model.UserData;
 import org.junit.jupiter.api.Test;
 
@@ -10,8 +11,20 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserServiceTest {
 
     @Test
-    void clear() {
+    void clear() throws ChessException {
+        DataAccess db = new MemoryDataAccess();
+        UserService service = new UserService(db);
+        UserData user = new UserData("joe", "j@j.com", "manysecrets");
+        service.register(user);
+        service.clear();
 
+        ChessException ex = assertThrows(
+                ChessException.class,
+                () -> service.login(new LoginInfo(user.username(), user.password()))
+        );
+
+        assertEquals(401, ex.getCode());
+        assertEquals("unauthorized", ex.getMessage());
     }
 
     @Test

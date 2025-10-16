@@ -19,10 +19,10 @@ public class UserService {
 
     public AuthData register(UserData user) throws ChessException {
         if (
-                user == null ||
-                user.username() == null || user.username().isBlank() ||
-                user.password() == null || user.password().isBlank() ||
-                user.email() == null || user.email().isBlank()
+            user == null ||
+            user.username() == null || user.username().isBlank() ||
+            user.password() == null || user.password().isBlank() ||
+            user.email() == null || user.email().isBlank()
         ) {
             throw new ChessException(400, "bad request");
         }
@@ -36,7 +36,11 @@ public class UserService {
     }
 
     public AuthData login(LoginInfo user) throws ChessException {
-        if (user.username() == null || user.password() == null) {
+        if (
+            user == null ||
+            user.username() == null || user.username().isBlank() ||
+            user.password() == null || user.password().isBlank()
+        ) {
             throw new ChessException(400, "bad request");
         }
         if (dataAccess.getUser(user.username()) == null) {
