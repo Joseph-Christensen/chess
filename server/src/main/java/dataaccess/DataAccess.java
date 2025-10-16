@@ -15,4 +15,5 @@ public interface DataAccess {
     HashMap<String,AuthData> allAuths();
     GameData getGame(int id);
     HashMap<Integer, GameData> allGames();
+    GameData createGame(String gameName);
 }

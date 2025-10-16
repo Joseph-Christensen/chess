@@ -29,6 +29,7 @@ public class Server {
         server.post("session", ctx -> login(ctx));
         server.delete("session", ctx -> logout(ctx));
         server.get("game", ctx -> listGames(ctx));
+        server.post("game", ctx -> createGame(ctx));
     }
 
     private void clear(Context ctx) {
@@ -88,6 +89,23 @@ public class Server {
             var games = gameService.listGames(authToken);
 
             ctx.result(serializer.toJson(games));
+        } catch (Exception ex) {
+            var msg = String.format("{ \"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(401).result(msg);
+        }
+    }
+
+    private void createGame(Context ctx) {
+        try {
+            var serializer = new Gson();
+            String reqJson = ctx.body();
+            var gameEntry = serializer.fromJson(reqJson, GameEntry.class);
+
+            String authToken = ctx.header("authorization");
+
+            CreateResponse res = gameService.createGame(gameEntry, authToken);
+
+            ctx.result(serializer.toJson(res));
         } catch (Exception ex) {
             var msg = String.format("{ \"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(401).result(msg);
