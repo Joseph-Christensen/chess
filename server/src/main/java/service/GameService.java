@@ -16,9 +16,9 @@ public class GameService {
         this.dataAccess = dataAccess;
     }
 
-    public HashSet<GameRepresentation> listGames(String authToken) throws Exception {
+    public HashSet<GameRepresentation> listGames(String authToken) throws ChessException {
         if (notAuthorized(authToken)) {
-            throw new Exception("unauthorized");
+            throw new ChessException(401, "unauthorized");
         }
         var allGameData = dataAccess.allGames();
         HashSet<GameRepresentation> games = new HashSet<>();
@@ -34,37 +34,40 @@ public class GameService {
         return games;
     }
 
-    public CreateResponse createGame(GameEntry gameEntry, String authToken) throws Exception {
+    public CreateResponse createGame(GameEntry gameEntry, String authToken) throws ChessException {
         if (notAuthorized(authToken)) {
-            throw new Exception("unauthorized");
+            throw new ChessException(401, "unauthorized");
+        }
+        if (gameEntry.gameName() == null) {
+            throw new ChessException(400, "bad request");
         }
         GameData game = dataAccess.createGame(gameEntry.gameName());
 
         return new CreateResponse(game.gameID());
     }
 
-    public void joinGame(JoinRequest joinRequest, String authToken) throws Exception {
+    public void joinGame(JoinRequest joinRequest, String authToken) throws ChessException {
         if (notAuthorized(authToken)) {
-            throw new Exception("unauthorized");
+            throw new ChessException(401, "unauthorized");
         }
         if (!Objects.equals(joinRequest.playerColor(), "WHITE")) {
             if (!Objects.equals(joinRequest.playerColor(), "BLACK")) {
-                throw new Exception("bad request");
+                throw new ChessException(400, "bad request");
             }
         }
         if (dataAccess.getGame(joinRequest.gameID()) == null) {
-            throw new Exception("bad request");
+            throw new ChessException(400, "bad request");
         }
         boolean isWhite;
         if (joinRequest.playerColor().equals("WHITE")) {
             if (dataAccess.getGame(joinRequest.gameID()).whiteUsername() != null) {
-                throw new Exception("already taken");
+                throw new ChessException(403, "already taken");
             }
             isWhite = true;
         }
         else {
             if (dataAccess.getGame(joinRequest.gameID()).blackUsername() != null) {
-                throw new Exception("already taken");
+                throw new ChessException(403, "already taken");
             }
             isWhite = false;
         }

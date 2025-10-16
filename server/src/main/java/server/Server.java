@@ -6,6 +6,7 @@ import dataaccess.MemoryDataAccess;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.*;
+import service.ChessException;
 import service.GameService;
 import service.UserService;
 
@@ -47,9 +48,9 @@ public class Server {
             var authData = userService.register(user);
 
             ctx.result(serializer.toJson(authData));
-        } catch (Exception ex) {
+        } catch (ChessException ex) {
             var msg = String.format("{ \"message\": \"Error: %s\"}", ex.getMessage());
-            ctx.status(403).result(msg);
+            ctx.status(ex.getCode()).result(msg);
         }
     }
 
@@ -62,9 +63,9 @@ public class Server {
             var authData = userService.login(user);
 
             ctx.result(serializer.toJson(authData));
-        } catch (Exception ex) {
+        } catch (ChessException ex) {
             var msg = String.format("{ \"message\": \"Error: %s\"}", ex.getMessage());
-            ctx.status(401).result(msg);
+            ctx.status(ex.getCode()).result(msg);
         }
     }
 
@@ -75,9 +76,9 @@ public class Server {
             userService.logout(authToken);
 
             ctx.result("{}");
-        } catch (Exception ex) {
+        } catch (ChessException ex) {
             var msg = String.format("{ \"message\": \"Error: %s\"}", ex.getMessage());
-            ctx.status(401).result(msg);
+            ctx.status(ex.getCode()).result(msg);
         }
     }
 
@@ -90,9 +91,9 @@ public class Server {
             var games = gameService.listGames(authToken);
 
             ctx.result(serializer.toJson(games));
-        } catch (Exception ex) {
+        } catch (ChessException ex) {
             var msg = String.format("{ \"message\": \"Error: %s\"}", ex.getMessage());
-            ctx.status(401).result(msg);
+            ctx.status(ex.getCode()).result(msg);
         }
     }
 
@@ -107,9 +108,9 @@ public class Server {
             CreateResponse res = gameService.createGame(gameEntry, authToken);
 
             ctx.result(serializer.toJson(res));
-        } catch (Exception ex) {
+        } catch (ChessException ex) {
             var msg = String.format("{ \"message\": \"Error: %s\"}", ex.getMessage());
-            ctx.status(401).result(msg);
+            ctx.status(ex.getCode()).result(msg);
         }
     }
 
@@ -124,9 +125,9 @@ public class Server {
             gameService.joinGame(joinRequest, authToken);
 
             ctx.result("{}");
-        } catch (Exception ex) {
+        } catch (ChessException ex) {
             var msg = String.format("{ \"message\": \"Error: %s\"}", ex.getMessage());
-            ctx.status(401).result(msg);
+            ctx.status(ex.getCode()).result(msg);
         }
     }
 

@@ -19,27 +19,33 @@ public class UserService {
         dataAccess.clear();
     }
 
-    public AuthData register(UserData user) throws Exception {
+    public AuthData register(UserData user) throws ChessException {
+        if (user.username() == null || user.password() == null || user.email() == null) {
+            throw new ChessException(400, "bad request");
+        }
         if (dataAccess.getUser(user.username()) != null) {
-            throw new Exception("already exists");
+            throw new ChessException(403, "already taken");
         }
         dataAccess.createUser(user);
         dataAccess.createAuth(new AuthData(user.username(), generateAuthToken()));
         return dataAccess.getAuth(user.username());
     }
 
-    public AuthData login(LoginInfo user) throws Exception {
+    public AuthData login(LoginInfo user) throws ChessException {
+        if (user.username() == null || user.password() == null) {
+            throw new ChessException(400, "bad request");
+        }
         if (dataAccess.getUser(user.username()) == null) {
-            throw new Exception("username not found");
+            throw new ChessException(401, "unauthorized");
         }
         if (!dataAccess.getPassword(user.username()).equals(user.password())) {
-            throw new Exception("incorrect password");
+            throw new ChessException(401, "unauthorized");
         }
         dataAccess.createAuth(new AuthData(user.username(), generateAuthToken()));
         return dataAccess.getAuth(user.username());
     }
 
-    public void logout(String authToken) throws Exception {
+    public void logout(String authToken) throws ChessException {
         boolean match = false;
         var myAuths = dataAccess.allAuths();
         for (Map.Entry<String, AuthData> entry : myAuths.entrySet()) {
@@ -50,7 +56,7 @@ public class UserService {
             }
         }
         if (!match) {
-            throw new Exception("unauthorized");
+            throw new ChessException(401, "unauthorized");
         }
     }
 
