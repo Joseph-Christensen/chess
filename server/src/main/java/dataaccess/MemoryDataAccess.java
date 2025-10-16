@@ -52,5 +52,13 @@ public class MemoryDataAccess implements DataAccess {
         return auths;
     }
 
+    @Override
+    public GameData getGame(int id) {
+        return games.get(id);
+    }
 
+    @Override
+    public HashMap<Integer, GameData> allGames() {
+        return games;
+    }
 }

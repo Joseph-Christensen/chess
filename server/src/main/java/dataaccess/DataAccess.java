@@ -13,4 +13,6 @@ public interface DataAccess {
     void removeAuth(String username);
     String getPassword(String username);
     HashMap<String,AuthData> allAuths();
+    GameData getGame(int id);
+    HashMap<Integer, GameData> allGames();
 }

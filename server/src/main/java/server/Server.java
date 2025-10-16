@@ -6,6 +6,7 @@ import dataaccess.MemoryDataAccess;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.*;
+import service.GameService;
 import service.UserService;
 
 import java.util.Map;
@@ -14,10 +15,12 @@ public class Server {
 
     private final Javalin server;
     private final UserService userService;
+    private final GameService gameService;
 
     public Server() {
         DataAccess dataAccess = new MemoryDataAccess();
         userService = new UserService(dataAccess);
+        gameService = new GameService(dataAccess);
 
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
@@ -25,6 +28,7 @@ public class Server {
         server.post("user", ctx -> register(ctx));
         server.post("session", ctx -> login(ctx));
         server.delete("session", ctx -> logout(ctx));
+        server.get("game", ctx -> listGames(ctx));
     }
 
     private void clear(Context ctx) {
@@ -69,6 +73,21 @@ public class Server {
             userService.logout(authToken);
 
             ctx.result("{}");
+        } catch (Exception ex) {
+            var msg = String.format("{ \"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(401).result(msg);
+        }
+    }
+
+    private void listGames(Context ctx) {
+        try {
+            var serializer = new Gson();
+
+            String authToken = ctx.header("authorization");
+
+            var games = gameService.listGames(authToken);
+
+            ctx.result(serializer.toJson(games));
         } catch (Exception ex) {
             var msg = String.format("{ \"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(401).result(msg);
