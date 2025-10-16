@@ -10,6 +10,7 @@ import service.ChessException;
 import service.GameService;
 import service.UserService;
 
+import java.util.HashSet;
 import java.util.Map;
 
 public class Server {
@@ -88,9 +89,9 @@ public class Server {
 
             String authToken = ctx.header("authorization");
 
-            var games = gameService.listGames(authToken);
+            HashSet<GameRepresentation> games = gameService.listGames(authToken);
 
-            ctx.result(serializer.toJson(games));
+            ctx.result(serializer.toJson(Map.of("games", games)));
         } catch (ChessException ex) {
             var msg = String.format("{ \"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(ex.getCode()).result(msg);

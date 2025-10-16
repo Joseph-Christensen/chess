@@ -75,14 +75,7 @@ public class GameService {
         dataAccess.updateGame(username, isWhite, joinRequest.gameID());
     }
 
-
     private boolean notAuthorized(String authToken) {
-        var myAuths = dataAccess.allAuths();
-        for (Map.Entry<String, AuthData> entry : myAuths.entrySet()) {
-            if (entry.getValue().authToken().equals(authToken)) {
-                return false;
-            }
-        }
-        return true;
+        return !dataAccess.allAuths().containsKey(authToken);
     }
 }

@@ -27,8 +27,9 @@ public class UserService {
             throw new ChessException(403, "already taken");
         }
         dataAccess.createUser(user);
-        dataAccess.createAuth(new AuthData(user.username(), generateAuthToken()));
-        return dataAccess.getAuth(user.username());
+        String authToken = generateAuthToken();
+        dataAccess.createAuth(new AuthData(authToken, user.username()));
+        return dataAccess.getAuth(authToken);
     }
 
     public AuthData login(LoginInfo user) throws ChessException {
@@ -41,23 +42,20 @@ public class UserService {
         if (!dataAccess.getPassword(user.username()).equals(user.password())) {
             throw new ChessException(401, "unauthorized");
         }
-        dataAccess.createAuth(new AuthData(user.username(), generateAuthToken()));
-        return dataAccess.getAuth(user.username());
+        String authToken = generateAuthToken();
+        dataAccess.createAuth(new AuthData(authToken, user.username()));
+        return dataAccess.getAuth(authToken);
     }
 
     public void logout(String authToken) throws ChessException {
-        boolean match = false;
-        var myAuths = dataAccess.allAuths();
-        for (Map.Entry<String, AuthData> entry : myAuths.entrySet()) {
-            if (entry.getValue().authToken().equals(authToken)) {
-                match = true;
-                dataAccess.removeAuth(entry.getKey());
-                break; // stop once found
-            }
-        }
-        if (!match) {
+        if (notAuthorized(authToken)) {
             throw new ChessException(401, "unauthorized");
         }
+        dataAccess.removeAuth(authToken);
+    }
+
+    private boolean notAuthorized(String authToken) {
+        return !dataAccess.allAuths().containsKey(authToken);
     }
 
     private String generateAuthToken() {
