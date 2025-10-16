@@ -26,7 +26,7 @@ class UserServiceTest {
     }
 
     @Test
-    void registerInvalidUsername() throws ChessException {
+    void registerInvalidUsername() {
         DataAccess db = new MemoryDataAccess();
         UserService service = new UserService(db);
         UserData user = new UserData("", "j@j.com", "manysecrets");

@@ -1,10 +1,8 @@
 package service;
 
 import dataaccess.DataAccess;
-import dataaccess.DataAccessException;
 import model.*;
 
-import java.util.Map;
 import java.util.UUID;
 
 public class UserService {

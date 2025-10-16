@@ -26,13 +26,13 @@ public class Server {
 
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
-        server.delete("db", ctx -> clear(ctx));
-        server.post("user", ctx -> register(ctx));
-        server.post("session", ctx -> login(ctx));
-        server.delete("session", ctx -> logout(ctx));
-        server.get("game", ctx -> listGames(ctx));
-        server.post("game", ctx -> createGame(ctx));
-        server.put("game", ctx -> joinGame(ctx));
+        server.delete("db", this::clear);
+        server.post("user", this::register);
+        server.post("session", this::login);
+        server.delete("session", this::logout);
+        server.get("game", this::listGames);
+        server.post("game", this::createGame);
+        server.put("game", this::joinGame);
     }
 
     private void clear(Context ctx) {
