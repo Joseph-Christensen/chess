@@ -14,7 +14,7 @@ class UserServiceTest {
     void clear() throws ChessException {
         DataAccess db = new MemoryDataAccess();
         UserService service = new UserService(db);
-        UserData user = new UserData("joe", "j@j.com", "manysecrets");
+        UserData user = new UserData("joe", "manysecrets", "j@j.com");
         service.register(user);
         service.clear();
 
@@ -31,7 +31,7 @@ class UserServiceTest {
     void register() throws ChessException {
         DataAccess db = new MemoryDataAccess();
         UserService service = new UserService(db);
-        UserData user = new UserData("joe", "j@j.com", "manysecrets");
+        UserData user = new UserData("joe", "manysecrets", "j@j.com");
         var authData = service.register(user);
         assertNotNull(authData);
         assertEquals(user.username(), authData.username());
@@ -42,7 +42,7 @@ class UserServiceTest {
     void registerInvalidUsername() {
         DataAccess db = new MemoryDataAccess();
         UserService service = new UserService(db);
-        UserData user = new UserData("", "j@j.com", "manysecrets");
+        UserData user = new UserData("", "manysecrets", "j@j.com");
 
         ChessException ex = assertThrows(
                 ChessException.class,
@@ -52,7 +52,7 @@ class UserServiceTest {
         assertEquals(400, ex.getCode());
         assertEquals("bad request", ex.getMessage());
 
-        UserData nextUser = new UserData(null, "j@j.com", "manysecrets");
+        UserData nextUser = new UserData(null, "somesecrets", "m@m.com");
 
         ChessException nextEx = assertThrows(
                 ChessException.class,
@@ -64,7 +64,39 @@ class UserServiceTest {
     }
 
     @Test
-    void login() {
+    void login() throws ChessException {
+        DataAccess db = new MemoryDataAccess();
+        UserService service = new UserService(db);
+        UserData user = new UserData("joe", "manysecrets", "j@j.com");
+        service.register(user);
+        var authData = service.login(new LoginInfo(user.username(), user.password()));
+        assertNotNull(authData);
+        assertEquals(user.username(), authData.username());
+        assertFalse(authData.authToken().isEmpty());
+    }
+
+    @Test
+    void loginIncorrectInfo() throws ChessException {
+        DataAccess db = new MemoryDataAccess();
+        UserService service = new UserService(db);
+        UserData user = new UserData("joe", "manysecrets", "j@j.com");
+        service.register(user);
+
+        ChessException ex = assertThrows(
+                ChessException.class,
+                () -> service.login(new LoginInfo("jae", user.password()))
+        );
+
+        assertEquals(401, ex.getCode());
+        assertEquals("unauthorized", ex.getMessage());
+
+        ChessException nextEx = assertThrows(
+                ChessException.class,
+                () -> service.login(new LoginInfo(user.username(), "somesecrets"))
+        );
+
+        assertEquals(401, nextEx.getCode());
+        assertEquals("unauthorized", nextEx.getMessage());
     }
 
     @Test
