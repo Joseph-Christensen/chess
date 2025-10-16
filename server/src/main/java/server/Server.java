@@ -30,6 +30,7 @@ public class Server {
         server.delete("session", ctx -> logout(ctx));
         server.get("game", ctx -> listGames(ctx));
         server.post("game", ctx -> createGame(ctx));
+        server.put("game", ctx -> joinGame(ctx));
     }
 
     private void clear(Context ctx) {
@@ -110,6 +111,10 @@ public class Server {
             var msg = String.format("{ \"message\": \"Error: %s\"}", ex.getMessage());
             ctx.status(401).result(msg);
         }
+    }
+
+    private void joinGame(Context ctx) {
+
     }
 
     public int run(int desiredPort) {

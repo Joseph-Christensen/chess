@@ -1,12 +1,10 @@
 package service;
 
 import dataaccess.DataAccess;
-import model.AuthData;
-import model.CreateResponse;
-import model.GameData;
-import model.GameEntry;
+import model.*;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 public class GameService {
@@ -17,11 +15,22 @@ public class GameService {
         this.dataAccess = dataAccess;
     }
 
-    public HashMap<Integer, GameData> listGames(String authToken) throws Exception {
+    public HashSet<GameRepresentation> listGames(String authToken) throws Exception {
         if (notAuthorized(authToken)) {
             throw new Exception("unauthorized");
         }
-        return dataAccess.allGames();
+        var allGameData = dataAccess.allGames();
+        HashSet<GameRepresentation> games = new HashSet<>();
+        for (Map.Entry<Integer, GameData> entry : allGameData.entrySet()) {
+            GameRepresentation currGame = new GameRepresentation(
+                    entry.getValue().gameID(),
+                    entry.getValue().whiteUsername(),
+                    entry.getValue().blackUsername(),
+                    entry.getValue().gameName()
+            );
+            games.add(currGame);
+        }
+        return games;
     }
 
     public CreateResponse createGame(GameEntry gameEntry, String authToken) throws Exception {
