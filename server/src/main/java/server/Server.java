@@ -114,7 +114,20 @@ public class Server {
     }
 
     private void joinGame(Context ctx) {
+        try {
+            var serializer = new Gson();
+            String reqJson = ctx.body();
+            var joinRequest = serializer.fromJson(reqJson, JoinRequest.class);
 
+            String authToken = ctx.header("authorization");
+
+            gameService.joinGame(joinRequest, authToken);
+
+            ctx.result("{}");
+        } catch (Exception ex) {
+            var msg = String.format("{ \"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(401).result(msg);
+        }
     }
 
     public int run(int desiredPort) {

@@ -4,6 +4,7 @@ import chess.ChessGame;
 import model.*;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class MemoryDataAccess implements DataAccess {
 
@@ -46,6 +47,17 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
+    public String getUsername(String authToken) {
+        var myAuths = allAuths();
+        for (Map.Entry<String, AuthData> entry : myAuths.entrySet()) {
+            if (entry.getValue().authToken().equals(authToken)) {
+                return entry.getValue().username();
+            }
+        }
+        return null;
+    }
+
+    @Override
     public String getPassword(String username) {
         return getUser(username).password();
     }
@@ -71,5 +83,28 @@ public class MemoryDataAccess implements DataAccess {
         games.put(nextID, game);
         nextID++;
         return game;
+    }
+
+    @Override
+    public void updateGame(String username, boolean isWhite, int id) {
+        GameData selectedGame = getGame(id);
+        if (isWhite) {
+            games.put(id, new GameData(
+                    selectedGame.gameID(),
+                    username,
+                    selectedGame.blackUsername(),
+                    selectedGame.gameName(),
+                    selectedGame.game()
+            ));
+        }
+        else {
+            games.put(id, new GameData(
+                    selectedGame.gameID(),
+                    selectedGame.whiteUsername(),
+                    username,
+                    selectedGame.gameName(),
+                    selectedGame.game()
+            ));
+        }
     }
 }

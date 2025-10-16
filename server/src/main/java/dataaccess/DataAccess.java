@@ -11,9 +11,11 @@ public interface DataAccess {
     void createAuth(AuthData user);
     AuthData getAuth(String username);
     void removeAuth(String username);
+    String getUsername(String authToken);
     String getPassword(String username);
     HashMap<String,AuthData> allAuths();
     GameData getGame(int id);
     HashMap<Integer, GameData> allGames();
     GameData createGame(String gameName);
+    void updateGame(String username, boolean isWhite, int id);
 }

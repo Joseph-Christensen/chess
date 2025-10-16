@@ -6,6 +6,7 @@ import model.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 
 public class GameService {
 
@@ -40,6 +41,35 @@ public class GameService {
         GameData game = dataAccess.createGame(gameEntry.gameName());
 
         return new CreateResponse(game.gameID());
+    }
+
+    public void joinGame(JoinRequest joinRequest, String authToken) throws Exception {
+        if (notAuthorized(authToken)) {
+            throw new Exception("unauthorized");
+        }
+        if (!Objects.equals(joinRequest.playerColor(), "WHITE")) {
+            if (!Objects.equals(joinRequest.playerColor(), "BLACK")) {
+                throw new Exception("bad request");
+            }
+        }
+        if (dataAccess.getGame(joinRequest.gameID()) == null) {
+            throw new Exception("bad request");
+        }
+        boolean isWhite;
+        if (joinRequest.playerColor().equals("WHITE")) {
+            if (dataAccess.getGame(joinRequest.gameID()).whiteUsername() != null) {
+                throw new Exception("already taken");
+            }
+            isWhite = true;
+        }
+        else {
+            if (dataAccess.getGame(joinRequest.gameID()).blackUsername() != null) {
+                throw new Exception("already taken");
+            }
+            isWhite = false;
+        }
+        String username = dataAccess.getUsername(authToken);
+        dataAccess.updateGame(username, isWhite, joinRequest.gameID());
     }
 
 
