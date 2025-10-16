@@ -80,6 +80,44 @@ class GameServiceTest {
     }
 
     @Test
-    void joinGame() {
+    void joinGame() throws ChessException {
+        DataAccess db = new MemoryDataAccess();
+        UserService userService = new UserService(db);
+        GameService gameService = new GameService(db);
+        UserData user = new UserData("joe", "manysecrets", "j@j.com");
+        var authData = userService.register(user);
+        GameData game = new GameData(1, null, null, "MyGame", new ChessGame());
+        gameService.createGame(new GameEntry(game.gameName()), authData.authToken());
+
+        GameData returnedGame = db.getGame(game.gameID());
+        assertNull(returnedGame.whiteUsername());
+
+        gameService.joinGame(new JoinRequest("WHITE", game.gameID()), authData.authToken());
+
+        GameData returnedGameTwo = db.getGame(game.gameID());
+        assertEquals(user.username(), returnedGameTwo.whiteUsername());
+    }
+
+    @Test
+    void joinTakenTeam() throws ChessException {
+        DataAccess db = new MemoryDataAccess();
+        UserService userService = new UserService(db);
+        GameService gameService = new GameService(db);
+        UserData user = new UserData("joe", "manysecrets", "j@j.com");
+        UserData user2 = new UserData("john", "nothingtohide", "johnson@john.com");
+        var authData = userService.register(user);
+        var authData2 = userService.register(user2);
+        GameData game = new GameData(1, null, null, "MyGame", new ChessGame());
+        gameService.createGame(new GameEntry(game.gameName()), authData.authToken());
+
+        gameService.joinGame(new JoinRequest("WHITE", game.gameID()), authData.authToken());
+
+        ChessException ex = assertThrows(
+                ChessException.class,
+                () -> gameService.joinGame(new JoinRequest("WHITE", game.gameID()), authData2.authToken())
+        );
+
+        assertEquals(403, ex.getCode());
+        assertEquals("already taken", ex.getMessage());
     }
 }
