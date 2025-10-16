@@ -11,6 +11,7 @@ class UserServiceTest {
 
     @Test
     void clear() {
+
     }
 
     @Test
@@ -29,7 +30,24 @@ class UserServiceTest {
         DataAccess db = new MemoryDataAccess();
         UserService service = new UserService(db);
         UserData user = new UserData("", "j@j.com", "manysecrets");
-//      assertThrows(ChessException)
+
+        ChessException ex = assertThrows(
+                ChessException.class,
+                () -> service.register(user)
+        );
+
+        assertEquals(400, ex.getCode());
+        assertEquals("bad request", ex.getMessage());
+
+        UserData nextUser = new UserData(null, "j@j.com", "manysecrets");
+
+        ChessException nextEx = assertThrows(
+                ChessException.class,
+                () -> service.register(nextUser)
+        );
+
+        assertEquals(400, nextEx.getCode());
+        assertEquals("bad request", nextEx.getMessage());
     }
 
     @Test

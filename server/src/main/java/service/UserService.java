@@ -20,7 +20,12 @@ public class UserService {
     }
 
     public AuthData register(UserData user) throws ChessException {
-        if (user.username() == null || user.password() == null || user.email() == null) {
+        if (
+                user == null ||
+                user.username() == null || user.username().isBlank() ||
+                user.password() == null || user.password().isBlank() ||
+                user.email() == null || user.email().isBlank()
+        ) {
             throw new ChessException(400, "bad request");
         }
         if (dataAccess.getUser(user.username()) != null) {
