@@ -100,6 +100,35 @@ class UserServiceTest {
     }
 
     @Test
-    void logout() {
+    void logout() throws ChessException {
+        DataAccess db = new MemoryDataAccess();
+        UserService service = new UserService(db);
+        UserData user = new UserData("joe", "manysecrets", "j@j.com");
+        var authData = service.register(user);
+        service.logout(authData.authToken());
+
+        ChessException ex = assertThrows(
+                ChessException.class,
+                () -> service.login(new LoginInfo("jae", user.password()))
+        );
+
+        assertEquals(401, ex.getCode());
+        assertEquals("unauthorized", ex.getMessage());
+    }
+
+    @Test
+    void logoutWrongAuth() throws ChessException {
+        DataAccess db = new MemoryDataAccess();
+        UserService service = new UserService(db);
+        UserData user = new UserData("joe", "manysecrets", "j@j.com");
+        service.register(user);
+
+        ChessException ex = assertThrows(
+                ChessException.class,
+                () -> service.logout("MyAuthToken")
+        );
+
+        assertEquals(401, ex.getCode());
+        assertEquals("unauthorized", ex.getMessage());
     }
 }
