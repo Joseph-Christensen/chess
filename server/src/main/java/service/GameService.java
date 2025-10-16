@@ -37,7 +37,7 @@ public class GameService {
         if (notAuthorized(authToken)) {
             throw new ChessException(401, "unauthorized");
         }
-        if (gameEntry.gameName() == null) {
+        if (gameEntry.gameName() == null || gameEntry.gameName().isBlank()) {
             throw new ChessException(400, "bad request");
         }
         GameData game = dataAccess.createGame(gameEntry.gameName());

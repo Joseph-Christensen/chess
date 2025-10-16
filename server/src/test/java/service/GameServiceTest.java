@@ -49,7 +49,34 @@ class GameServiceTest {
     }
 
     @Test
-    void createGame() {
+    void createGame() throws ChessException {
+        DataAccess db = new MemoryDataAccess();
+        UserService userService = new UserService(db);
+        GameService gameService = new GameService(db);
+        UserData user = new UserData("joe", "manysecrets", "j@j.com");
+        var authData = userService.register(user);
+        GameData game = new GameData(1, null, null, "MyGame", new ChessGame());
+        gameService.createGame(new GameEntry(game.gameName()), authData.authToken());
+
+        GameData returnedGame = db.getGame(game.gameID());
+        assertEquals(game, returnedGame);
+    }
+
+    @Test
+    void createGameNoName() throws ChessException {
+        DataAccess db = new MemoryDataAccess();
+        UserService userService = new UserService(db);
+        GameService gameService = new GameService(db);
+        UserData user = new UserData("joe", "manysecrets", "j@j.com");
+        var authData = userService.register(user);
+
+        ChessException ex = assertThrows(
+                ChessException.class,
+                () -> gameService.createGame(new GameEntry(""), authData.authToken())
+        );
+
+        assertEquals(400, ex.getCode());
+        assertEquals("bad request", ex.getMessage());
     }
 
     @Test
