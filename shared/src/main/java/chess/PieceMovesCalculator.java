@@ -48,4 +48,31 @@ public class PieceMovesCalculator {
         }
         return moves;
     }
+
+    protected ChessMove positionMoveCalc(int rowDir, int colDir, ChessBoard board, ChessPosition startPos, ChessGame.TeamColor team) {
+        int row = startPos.getRow() + rowDir;
+        int col = startPos.getColumn() + colDir;
+
+        if (row < 1 || row > 8) {
+            return null;
+        }
+        if (col < 1 || col > 8) {
+            return null;
+        }
+        ChessPosition endPos = new ChessPosition(row, col);
+
+        if (board.getPiece(endPos) == null) {
+            // no piece
+            return new ChessMove(startPos, endPos, null);
+        }
+        else {
+            // piece detected
+            if (board.getPiece(endPos).getTeamColor() != team) {
+                // different team
+                return new ChessMove(startPos, endPos, null);
+            } else {
+                return null;
+            }
+        }
+    }
 }
