@@ -26,7 +26,7 @@ public class PieceMovesCalculator {
 
         while (true) {
             if (row < 1 || row > 8 || col < 1 || col > 8) {
-                return null;
+                break;
             }
             ChessPosition currPos = new ChessPosition(row, col);
 
@@ -70,22 +70,22 @@ public class PieceMovesCalculator {
         }
     }
 
-    protected Collection<ChessMove> pawnMoveCalc(int row, int col, ChessBoard board, ChessPosition startPos, ChessGame.TeamColor team, boolean promotion, boolean needsEmpty, boolean needsEnemy) {
+    protected Collection<ChessMove> pawnMoveCalc(int row, int col, ChessBoard board, ChessPosition startPos, ChessGame.TeamColor team, boolean promotion, boolean isCapture) {
         var moves = new HashSet<ChessMove>();
 
         if (row < 1 || row > 8 || col < 1 || col > 8) {
-            return null;
+            return moves;
         }
 
         ChessPosition endPos = new ChessPosition(row, col);
         ChessPiece targetPiece = board.getPiece(endPos);
 
-        if (needsEmpty && targetPiece != null) {
-            return null;
+        if (!isCapture && targetPiece != null) {
+            return moves;
         }
 
-        if (needsEnemy && (targetPiece == null || targetPiece.getTeamColor() == team)) {
-            return null;
+        if (isCapture && (targetPiece == null || targetPiece.getTeamColor() == team)) {
+            return moves;
         }
 
         if (promotion) {
