@@ -70,6 +70,17 @@ public class PieceMovesCalculator {
         }
     }
 
+    protected Collection<ChessMove> collectSingleStepMoves(int[][] directions) {
+        var moves = new HashSet<ChessMove>();
+        for (int[] direction : directions) {
+            var move = positionMoveCalc(direction[0], direction[1], board, position, piece.getTeamColor());
+            if (move != null) {
+                moves.add(move);
+            }
+        }
+        return moves;
+    }
+
     protected Collection<ChessMove> pawnMoveCalc(int row, int col, ChessBoard board, ChessPosition startPos, ChessGame.TeamColor team, boolean promotion, boolean isCapture) {
         var moves = new HashSet<ChessMove>();
 
