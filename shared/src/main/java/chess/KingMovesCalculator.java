@@ -11,13 +11,10 @@ public class KingMovesCalculator extends PieceMovesCalculator {
 
     @Override
     public Collection<ChessMove> returnMoves() {
-        var moves = new HashSet<ChessMove>();
-        int[][] directions = {{-1,1},{1,1},{1,-1},{-1,-1},{1,0},{0,1},{-1,0},{0,-1}};
-        for (int[] direction : directions) {
-            if (positionMoveCalc(direction[0], direction[1], board, position, piece.getTeamColor()) != null) {
-                moves.add(positionMoveCalc(direction[0], direction[1], board, position, piece.getTeamColor()));
-            }
-        }
-        return moves;
+        int[][] directions = {
+                {-1, 1}, {1, 1}, {1, -1}, {-1, -1},
+                {1, 0}, {0, 1}, {-1, 0}, {0, -1}
+        };
+        return collectSingleStepMoves(directions);
     }
 }
