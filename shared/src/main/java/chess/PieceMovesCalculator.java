@@ -5,11 +5,11 @@ import java.util.HashSet;
 
 public class PieceMovesCalculator {
 
-    private final ChessBoard board;
-    private final ChessPosition position;
-    private final ChessPiece piece;
+    protected final ChessBoard board;
+    protected final ChessPosition position;
+    protected final ChessPiece piece;
 
-    PieceMovesCalculator(ChessBoard board, ChessPosition position, ChessPiece piece) {
+    protected PieceMovesCalculator(ChessBoard board, ChessPosition position, ChessPiece piece) {
         this.board = board;
         this.position = position;
         this.piece = piece;
@@ -19,7 +19,7 @@ public class PieceMovesCalculator {
         return new HashSet<ChessMove>();
     }
 
-    private Collection<ChessMove> directionalMoveCalc(int rowDir, int colDir, ChessBoard board, ChessPosition startPos, ChessGame.TeamColor team) {
+    protected Collection<ChessMove> directionalMoveCalc(int rowDir, int colDir, ChessBoard board, ChessPosition startPos, ChessGame.TeamColor team) {
         var moves = new HashSet<ChessMove>();
         int row = startPos.getRow() + rowDir;
         int col = startPos.getColumn() + colDir;
