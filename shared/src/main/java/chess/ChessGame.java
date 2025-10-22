@@ -157,40 +157,25 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         var coveredPositions = new HashSet<ChessPosition>();
-        if (teamColor == TeamColor.WHITE) {
-            // white
-            for (int i = 1; i < 9; i++) {
-                for (int j = 1; j < 9; j++) {
-                    ChessPosition currPosition = new ChessPosition(i, j);
-                    ChessPiece currPiece = myBoard.getPiece(currPosition);
-                    if ((currPiece != null) && (currPiece.getTeamColor() == TeamColor.BLACK)) {
-                        // is a black piece
-                        var moves = currPiece.pieceMoves(myBoard, currPosition);
-                        for (ChessMove move : moves) {
-                            coveredPositions.add(move.getEndPosition());
-                        }
-                    }
+        TeamColor enemyColor = (teamColor == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
+        ChessPosition kingPos = (teamColor == TeamColor.WHITE) ? whiteKing : blackKing;
+
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                ChessPosition currPosition = new ChessPosition(i, j);
+                ChessPiece currPiece = myBoard.getPiece(currPosition);
+
+                if (currPiece == null || currPiece.getTeamColor() != enemyColor) {
+                    continue;
+                }
+
+                var moves = currPiece.pieceMoves(myBoard, currPosition);
+                for (ChessMove move : moves) {
+                    coveredPositions.add(move.getEndPosition());
                 }
             }
-            return coveredPositions.contains(whiteKing);
         }
-        else {
-            // black
-            for (int i = 1; i < 9; i++) {
-                for (int j = 1; j < 9; j++) {
-                    ChessPosition currPosition = new ChessPosition(i, j);
-                    ChessPiece currPiece = myBoard.getPiece(currPosition);
-                    if ((currPiece != null) && (currPiece.getTeamColor() == TeamColor.WHITE)) {
-                        // is a white piece
-                        var moves = currPiece.pieceMoves(myBoard, currPosition);
-                        for (ChessMove move : moves) {
-                            coveredPositions.add(move.getEndPosition());
-                        }
-                    }
-                }
-            }
-            return coveredPositions.contains(blackKing);
-        }
+        return coveredPositions.contains(kingPos);
     }
 
     /**
@@ -291,7 +276,12 @@ public class ChessGame {
         }
 
         ChessGame chessGame = (ChessGame) o;
-        return Objects.equals(myBoard, chessGame.myBoard) && teamTurn == chessGame.teamTurn && Objects.equals(whiteKing, chessGame.whiteKing) && Objects.equals(blackKing, chessGame.blackKing);
+        return (
+                Objects.equals(myBoard, chessGame.myBoard) &&
+                teamTurn == chessGame.teamTurn &&
+                Objects.equals(whiteKing, chessGame.whiteKing) &&
+                Objects.equals(blackKing, chessGame.blackKing)
+        );
     }
 
     @Override

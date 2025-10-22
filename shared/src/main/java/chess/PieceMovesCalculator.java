@@ -81,7 +81,10 @@ public class PieceMovesCalculator {
         return moves;
     }
 
-    protected Collection<ChessMove> pawnMoveCalc(int row, int col, ChessBoard board, ChessPosition startPos, ChessGame.TeamColor team, boolean promotion, boolean isCapture) {
+    protected Collection<ChessMove> pawnMoveCalc(
+            int row, int col, ChessBoard board,
+            ChessPosition startPos, ChessGame.TeamColor team,
+            boolean promotion, boolean isCapture) {
         var moves = new HashSet<ChessMove>();
 
         if (row < 1 || row > 8 || col < 1 || col > 8) {
