@@ -16,7 +16,7 @@ public class PieceMovesCalculator {
     }
 
     public Collection<ChessMove> returnMoves() {
-        return new HashSet<ChessMove>();
+        return new HashSet<>();
     }
 
     protected Collection<ChessMove> directionalMoveCalc(int rowDir, int colDir, ChessBoard board, ChessPosition startPos, ChessGame.TeamColor team) {
@@ -25,11 +25,8 @@ public class PieceMovesCalculator {
         int col = startPos.getColumn() + colDir;
 
         while (true) {
-            if (row < 1 || row > 8) {
-                break;
-            }
-            if (col < 1 || col > 8) {
-                break;
+            if (row < 1 || row > 8 || col < 1 || col > 8) {
+                return null;
             }
             ChessPosition currPos = new ChessPosition(row, col);
 
@@ -53,10 +50,7 @@ public class PieceMovesCalculator {
         int row = startPos.getRow() + rowDir;
         int col = startPos.getColumn() + colDir;
 
-        if (row < 1 || row > 8) {
-            return null;
-        }
-        if (col < 1 || col > 8) {
+        if (row < 1 || row > 8 || col < 1 || col > 8) {
             return null;
         }
         ChessPosition endPos = new ChessPosition(row, col);
@@ -74,5 +68,34 @@ public class PieceMovesCalculator {
                 return null;
             }
         }
+    }
+
+    protected Collection<ChessMove> pawnMoveCalc(int row, int col, ChessBoard board, ChessPosition startPos, ChessGame.TeamColor team, boolean promotion, boolean needsEmpty, boolean needsEnemy) {
+        var moves = new HashSet<ChessMove>();
+
+        if (row < 1 || row > 8 || col < 1 || col > 8) {
+            return null;
+        }
+
+        ChessPosition endPos = new ChessPosition(row, col);
+        ChessPiece targetPiece = board.getPiece(endPos);
+
+        if (needsEmpty && targetPiece != null) {
+            return null;
+        }
+
+        if (needsEnemy && (targetPiece == null || targetPiece.getTeamColor() == team)) {
+            return null;
+        }
+
+        if (promotion) {
+            moves.add(new ChessMove(startPos, endPos, ChessPiece.PieceType.QUEEN));
+            moves.add(new ChessMove(startPos, endPos, ChessPiece.PieceType.ROOK));
+            moves.add(new ChessMove(startPos, endPos, ChessPiece.PieceType.BISHOP));
+            moves.add(new ChessMove(startPos, endPos, ChessPiece.PieceType.KNIGHT));
+        } else {
+            moves.add(new ChessMove(startPos, endPos, null));
+        }
+        return moves;
     }
 }
