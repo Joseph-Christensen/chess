@@ -102,18 +102,13 @@ public class SqlDataAccess implements DataAccess {
     @Override
     public void removeAuth(String authToken) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            String statement = "SELECT authToken, username FROM authData WHERE authToken = ?";
+            String statement = "DELETE FROM authData WHERE authToken = ?";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setString(1, authToken);
-                try (var res = ps.executeQuery()) {
-                    if (res.next()) {
-                        String myAuth = res.getString("authToken");
-                        String myStr = res.getString("username");
-                    }
-                }
+                ps.executeQuery();
             }
         } catch (SQLException | DataAccessException ex) {
-            throw new DataAccessException("Error getting auth: " + ex.getMessage(), ex);
+            throw new DataAccessException("Error removing auth: " + ex.getMessage(), ex);
         }
     }
 
