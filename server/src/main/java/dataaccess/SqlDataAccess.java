@@ -1,11 +1,15 @@
 package dataaccess;
 
+import chess.ChessGame;
+import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
 
 import java.sql.SQLException;
 import java.util.HashMap;
+
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
 public class SqlDataAccess implements DataAccess {
 
@@ -172,7 +176,28 @@ public class SqlDataAccess implements DataAccess {
 
     @Override
     public GameData getGame(int id) throws DataAccessException {
-        return null;
+        try (var conn = DatabaseManager.getConnection()) {
+            String statement = "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM gameData WHERE gameID = ?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, id);
+                try (var res = ps.executeQuery()) {
+                    if (res.next()) {
+                        ChessGame game = stringToGame(res.getString("game"));
+                        return new GameData(
+                                res.getInt("gameID"),
+                                res.getString("whiteUsername"),
+                                res.getString("blackUsername"),
+                                res.getString("gameName"),
+                                game
+                        );
+                    } else {
+                        return null;
+                    }
+                }
+            }
+        } catch (SQLException | DataAccessException ex) {
+            throw new DataAccessException("Error getting auth: " + ex.getMessage(), ex);
+        }
     }
 
     @Override
@@ -182,11 +207,36 @@ public class SqlDataAccess implements DataAccess {
 
     @Override
     public GameData createGame(String gameName) throws DataAccessException {
-        return null;
+        try (var conn = DatabaseManager.getConnection()) {
+            String statement = "INSERT INTO gameData (gameName, game) VALUES (?,?)";
+            try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
+                ps.setString(1, gameName);
+                ChessGame game = new ChessGame();
+                String chessString = game.toString();
+                ps.setString(2, chessString);
+                ps.executeUpdate();
+
+                try (var rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        int gameID = rs.getInt(1);
+                        return new GameData(gameID, null, null, gameName, game);
+                    } else {
+                        throw new DataAccessException("Failed to retrieve generated game ID");
+                    }
+                }
+            }
+        } catch (SQLException | DataAccessException ex) {
+            throw new DataAccessException("Error creating user: " + ex.getMessage(), ex);
+        }
     }
 
     @Override
     public void updateGame(String username, boolean isWhite, int id) throws DataAccessException {
 
+    }
+
+    private ChessGame stringToGame(String json) {
+        var serializer = new Gson();
+        return serializer.fromJson(json, ChessGame.class);
     }
 }

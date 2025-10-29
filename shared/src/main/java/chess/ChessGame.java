@@ -1,5 +1,7 @@
 package chess;
 
+import com.google.gson.Gson;
+
 import java.util.*;
 
 /**
@@ -291,5 +293,11 @@ public class ChessGame {
         result = 31 * result + Objects.hashCode(whiteKing);
         result = 31 * result + Objects.hashCode(blackKing);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        var serializer = new Gson();
+        return serializer.toJson(this);
     }
 }
