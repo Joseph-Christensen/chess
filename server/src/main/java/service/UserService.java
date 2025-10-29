@@ -32,10 +32,10 @@ public class UserService {
         ) {
             throw new ChessException(400, "bad request");
         }
-        if (dataAccess.getUser(user.username()) != null) {
-            throw new ChessException(403, "already taken");
-        }
         try {
+            if (dataAccess.getUser(user.username()) != null) {
+                throw new ChessException(403, "already taken");
+            }
             dataAccess.createUser(user);
             String authToken = generateAuthToken();
             dataAccess.createAuth(new AuthData(authToken, user.username()));
@@ -54,15 +54,20 @@ public class UserService {
         ) {
             throw new ChessException(400, "bad request");
         }
-        if (dataAccess.getUser(user.username()) == null) {
-            throw new ChessException(401, "unauthorized");
+        try {
+            if (dataAccess.getUser(user.username()) == null) {
+                throw new ChessException(401, "unauthorized");
+            }
+            if (!dataAccess.getPassword(user.username()).equals(user.password())) {
+                throw new ChessException(401, "unauthorized");
+            }
+            String authToken = generateAuthToken();
+            dataAccess.createAuth(new AuthData(authToken, user.username()));
+            return dataAccess.getAuth(authToken);
+        } catch (DataAccessException ex) {
+            throw new ChessException(500, ex.getMessage());
         }
-        if (!dataAccess.getPassword(user.username()).equals(user.password())) {
-            throw new ChessException(401, "unauthorized");
-        }
-        String authToken = generateAuthToken();
-        dataAccess.createAuth(new AuthData(authToken, user.username()));
-        return dataAccess.getAuth(authToken);
+
     }
 
     public void logout(String authToken) throws ChessException {

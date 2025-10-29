@@ -1,7 +1,5 @@
 package dataaccess;
 
-import service.ChessException;
-
 import java.sql.*;
 import java.util.Properties;
 

@@ -2,14 +2,15 @@ package dataaccess;
 
 import model.*;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 
 public interface DataAccess {
     void clear() throws DataAccessException;
     void createUser(UserData user) throws DataAccessException;
-    UserData getUser(String username);
-    void createAuth(AuthData user);
-    AuthData getAuth(String username);
+    UserData getUser(String username) throws DataAccessException;
+    void createAuth(AuthData user) throws DataAccessException;
+    AuthData getAuth(String username) throws DataAccessException;
     void removeAuth(String username);
     String getUsername(String authToken);
     String getPassword(String username);
