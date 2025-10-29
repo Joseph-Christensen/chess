@@ -2,7 +2,9 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
+import dataaccess.SqlDataAccess;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.*;
@@ -20,7 +22,15 @@ public class Server {
     private final GameService gameService;
 
     public Server() {
-        DataAccess dataAccess = new MemoryDataAccess();
+        DataAccess dataAccess = null;
+        try {
+            dataAccess = new SqlDataAccess();
+        } catch (DataAccessException ex) {
+            var msg = String.format("{ \"message\": \"Error: %s\"}", ex.getMessage());
+            System.out.print(msg);
+            System.exit(400);
+        }
+
         userService = new UserService(dataAccess);
         gameService = new GameService(dataAccess);
 
@@ -36,8 +46,13 @@ public class Server {
     }
 
     private void clear(Context ctx) {
-        userService.clear();
-        ctx.result("{}");
+        try {
+            userService.clear();
+            ctx.result("{}");
+        } catch (ChessException ex) {
+            var msg = String.format("{ \"message\": \"Error: %s\"}", ex.getMessage());
+            ctx.status(ex.getCode()).result(msg);
+        }
     }
 
     private void register(Context ctx) {

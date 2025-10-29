@@ -5,7 +5,7 @@ import model.*;
 import java.util.HashMap;
 
 public interface DataAccess {
-    void clear();
+    void clear() throws DataAccessException;
     void createUser(UserData user);
     UserData getUser(String username);
     void createAuth(AuthData user);

@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class DataAccessTest {
 
     @Test
-    void clear() {
+    void clear() throws DataAccessException {
         DataAccess db = new MemoryDataAccess();
         db.createUser(new UserData("joe", "manysecrets", "j@j.com"));
         db.clear();

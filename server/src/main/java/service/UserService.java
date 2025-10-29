@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
 import model.*;
 
 import java.util.UUID;
@@ -13,8 +14,13 @@ public class UserService {
         this.dataAccess = dataAccess;
     }
 
-    public void clear() {
-        dataAccess.clear();
+    public void clear() throws ChessException {
+        try {
+            dataAccess.clear();
+        } catch (DataAccessException ex) {
+            throw new ChessException(500, ex.getMessage());
+        }
+
     }
 
     public AuthData register(UserData user) throws ChessException {
