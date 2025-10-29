@@ -105,7 +105,7 @@ public class SqlDataAccess implements DataAccess {
             String statement = "DELETE FROM authData WHERE authToken = ?";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setString(1, authToken);
-                ps.executeQuery();
+                ps.executeUpdate();
             }
         } catch (SQLException | DataAccessException ex) {
             throw new DataAccessException("Error removing auth: " + ex.getMessage(), ex);
@@ -113,13 +113,41 @@ public class SqlDataAccess implements DataAccess {
     }
 
     @Override
-    public String getUsername(String authToken) {
-        return "";
+    public String getUsername(String authToken) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            String statement = "SELECT username FROM authData WHERE authToken = ?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setString(1, authToken);
+                try (var res = ps.executeQuery()) {
+                    if (res.next()) {
+                        return res.getString("username");
+                    } else {
+                        return null;
+                    }
+                }
+            }
+        } catch (SQLException | DataAccessException ex) {
+            throw new DataAccessException("Error getting auth: " + ex.getMessage(), ex);
+        }
     }
 
     @Override
-    public String getPassword(String username) {
-        return "";
+    public String getPassword(String username) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            String statement = "SELECT password FROM userData WHERE username = ?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setString(1, username);
+                try (var res = ps.executeQuery()) {
+                    if (res.next()) {
+                        return res.getString("password");
+                    } else {
+                        return null;
+                    }
+                }
+            }
+        } catch (SQLException | DataAccessException ex) {
+            throw new DataAccessException("Error getting auth: " + ex.getMessage(), ex);
+        }
     }
 
     @Override
