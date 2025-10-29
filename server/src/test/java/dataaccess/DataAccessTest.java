@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.script.ScriptEngine;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -186,5 +185,36 @@ class DataAccessTest {
     @Test
     void getGameNegative() throws DataAccessException {
         assertNull(db.getGame(1));
+    }
+
+    @Test
+    void allGames() throws DataAccessException {
+        db.createGame("game1");
+        db.createGame("game2");
+        HashMap<Integer, GameData> all = db.allGames();
+        assertTrue(all.size() >= 2);
+    }
+
+    @Test
+    void allGamesNegative() throws DataAccessException {
+        assertTrue(db.allGames().isEmpty());
+    }
+
+    @Test
+    void updateGame() throws DataAccessException {
+        GameData game = db.createGame("game1");
+        UserData user = new UserData("joe", "manysecrets", "j@j.com");
+        db.updateGame(user.username(), true, game.gameID());
+        GameData found = db.getGame(game.gameID());
+        assertEquals(user.username(), found.whiteUsername());
+    }
+
+    @Test
+    void updateGameNegative() throws DataAccessException {
+        GameData game = db.createGame("game1");
+        UserData user = new UserData("joe", "manysecrets", "j@j.com");
+
+        assertDoesNotThrow(() -> db.updateGame(user.username(), true, 2));
+        assertNull(db.getGame(game.gameID()).whiteUsername());
     }
 }
