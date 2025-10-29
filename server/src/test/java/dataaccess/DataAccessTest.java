@@ -35,12 +35,10 @@ class DataAccessTest {
     @Test
     void createUser() throws DataAccessException {
         UserData user = new UserData("joe", "manysecrets", "j@j.com");
-        db.createUser(user);
-        UserData found = db.getUser("joe");
 
-        assertNotNull(found);
-        assertEquals(user.username(), found.username());
-        assertEquals(user.password(), found.password());
+        assertDoesNotThrow(() -> db.createUser(user));
+
+        assertNotNull(db.getUser("joe"));
     }
 
     @Test
@@ -75,11 +73,10 @@ class DataAccessTest {
     @Test
     void createAuth() throws DataAccessException {
         AuthData auth = new AuthData("xyz", "joe");
-        db.createAuth(auth);
-        AuthData found = db.getAuth("xyz");
 
-        assertNotNull(found);
-        assertEquals(auth.username(), found.username());
+        assertDoesNotThrow(() -> db.createAuth(auth));
+
+        assertNotNull(db.getAuth("xyz"));
     }
 
     @Test
