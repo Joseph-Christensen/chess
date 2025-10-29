@@ -118,7 +118,7 @@ class DataAccessTest {
     }
 
     @Test
-    public void removeAuthFails() throws DataAccessException {
+    public void removeAuthFails() {
         assertDoesNotThrow(() -> db.removeAuth("xyz"));
     }
 
