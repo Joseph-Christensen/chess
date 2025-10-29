@@ -107,6 +107,34 @@ class DataAccessTest {
     }
 
     @Test
+    public void removeAuth() throws DataAccessException {
+        AuthData auth = new AuthData("xyz", "joe");
+        db.createAuth(auth);
+
+        db.removeAuth(auth.authToken());
+        AuthData result = db.getAuth("xyz");
+
+        assertNull(result);
+    }
+
+    @Test
+    public void removeAuthFails() throws DataAccessException {
+        assertDoesNotThrow(() -> db.removeAuth("xyz"));
+    }
+
+    @Test
+    void getUsername() throws DataAccessException {
+        AuthData auth = new AuthData("xyz", "joe");
+        db.createAuth(auth);
+        assertEquals(auth.username(), db.getUsername("xyz"));
+    }
+
+    @Test
+    void getUsernameFails() throws DataAccessException {
+        assertNull(db.getUsername("xyz"));
+    }
+
+    @Test
     void getPassword() throws DataAccessException {
         UserData user = new UserData("joe", "manysecrets", "j@j.com");
         db.createUser(user);
