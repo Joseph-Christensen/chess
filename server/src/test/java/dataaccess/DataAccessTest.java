@@ -36,16 +36,35 @@ class DataAccessTest {
         UserData selectedUser = db.getUser("joe");
 
         assertNotNull(selectedUser);
-        assertEquals("joe", selectedUser.username());
-        assertEquals("manysecrets", selectedUser.password());
+        assertEquals(user.username(), selectedUser.username());
+        assertEquals(user.password(), selectedUser.password());
     }
 
     @Test
     void createUserFails() throws DataAccessException {
+        UserData user = new UserData("joe", "manysecrets", "j@j.com");
+        db.createUser(user);
 
+        assertThrows(
+                DataAccessException.class,
+                () -> db.createUser(new UserData(user.username(), "somesecrets", "john@johnson.com"))
+        );
     }
 
     @Test
-    void getUser() {
+    void getUser() throws DataAccessException {
+        UserData user = new UserData("joe", "manysecrets", "j@j.com");
+        db.createUser(user);
+        UserData selectedUser = db.getUser("joe");
+
+        assertNotNull(selectedUser);
+        assertEquals(user.username(), selectedUser.username());
+        assertEquals(user.password(), selectedUser.password());
+    }
+
+    @Test
+    void getUserFails() throws DataAccessException {
+        UserData user = db.getUser("joe");
+        assertNull(user);
     }
 }
