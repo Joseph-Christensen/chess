@@ -5,6 +5,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class DataAccessTest {
@@ -42,7 +44,7 @@ class DataAccessTest {
     }
 
     @Test
-    void createUserFails() throws DataAccessException {
+    void createUserNegative() throws DataAccessException {
         UserData user = new UserData("joe", "manysecrets", "j@j.com");
         db.createUser(user);
 
@@ -64,7 +66,7 @@ class DataAccessTest {
     }
 
     @Test
-    void getUserFails() throws DataAccessException {
+    void getUserNegative() throws DataAccessException {
         UserData user = db.getUser("joe");
 
         assertNull(user);
@@ -81,7 +83,7 @@ class DataAccessTest {
     }
 
     @Test
-    void createAuthFails() throws DataAccessException {
+    void createAuthNegative() throws DataAccessException {
         AuthData auth = new AuthData("xyz", "joe");
         db.createAuth(auth);
 
@@ -102,7 +104,7 @@ class DataAccessTest {
     }
 
     @Test
-    void getAuthFails() throws DataAccessException {
+    void getAuthNegative() throws DataAccessException {
         assertNull(db.getAuth("xyz"));
     }
 
@@ -118,7 +120,7 @@ class DataAccessTest {
     }
 
     @Test
-    public void removeAuthFails() {
+    public void removeAuthNegative() {
         assertDoesNotThrow(() -> db.removeAuth("xyz"));
     }
 
@@ -130,7 +132,7 @@ class DataAccessTest {
     }
 
     @Test
-    void getUsernameFails() throws DataAccessException {
+    void getUsernameNegative() throws DataAccessException {
         assertNull(db.getUsername("xyz"));
     }
 
@@ -142,7 +144,20 @@ class DataAccessTest {
     }
 
     @Test
-    void getPasswordFails() throws DataAccessException {
+    void getPasswordNegative() throws DataAccessException {
         assertNull(db.getPassword("joe"));
+    }
+
+    @Test
+    void allAuths() throws DataAccessException {
+        db.createAuth(new AuthData("t1", "u1"));
+        db.createAuth(new AuthData("t2", "u2"));
+        HashMap<String, AuthData> auths = db.allAuths();
+        assertEquals(2, auths.size());
+    }
+
+    @Test
+    void allAuthsNegative() throws DataAccessException {
+        assertTrue(db.allAuths().isEmpty());
     }
 }
