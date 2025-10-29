@@ -1,6 +1,6 @@
 package dataaccess;
 
-import model.UserData;
+import model.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +26,7 @@ class DataAccessTest {
     void clearTest() throws DataAccessException {
         db.createUser(new UserData("joe", "manysecrets", "j@j.com"));
         db.clear();
+
         assertNull(db.getUser("joe"));
     }
 
@@ -33,11 +34,11 @@ class DataAccessTest {
     void createUser() throws DataAccessException {
         UserData user = new UserData("joe", "manysecrets", "j@j.com");
         db.createUser(user);
-        UserData selectedUser = db.getUser("joe");
+        UserData found = db.getUser("joe");
 
-        assertNotNull(selectedUser);
-        assertEquals(user.username(), selectedUser.username());
-        assertEquals(user.password(), selectedUser.password());
+        assertNotNull(found);
+        assertEquals(user.username(), found.username());
+        assertEquals(user.password(), found.password());
     }
 
     @Test
@@ -55,16 +56,65 @@ class DataAccessTest {
     void getUser() throws DataAccessException {
         UserData user = new UserData("joe", "manysecrets", "j@j.com");
         db.createUser(user);
-        UserData selectedUser = db.getUser("joe");
+        UserData found = db.getUser("joe");
 
-        assertNotNull(selectedUser);
-        assertEquals(user.username(), selectedUser.username());
-        assertEquals(user.password(), selectedUser.password());
+        assertNotNull(found);
+        assertEquals(user.username(), found.username());
+        assertEquals(user.password(), found.password());
     }
 
     @Test
     void getUserFails() throws DataAccessException {
         UserData user = db.getUser("joe");
+
         assertNull(user);
+    }
+
+    @Test
+    void createAuth() throws DataAccessException {
+        AuthData auth = new AuthData("xyz", "joe");
+        db.createAuth(auth);
+        AuthData found = db.getAuth("xyz");
+
+        assertNotNull(found);
+        assertEquals(auth.username(), found.username());
+    }
+
+    @Test
+    void createAuthFails() throws DataAccessException {
+        AuthData auth = new AuthData("xyz", "joe");
+        db.createAuth(auth);
+
+        assertThrows(
+                DataAccessException.class,
+                () -> db.createAuth(new AuthData(auth.authToken(), "john"))
+        );
+    }
+
+    @Test
+    void getAuth() throws DataAccessException {
+        AuthData auth = new AuthData("xyz", "joe");
+        db.createAuth(auth);
+        AuthData found = db.getAuth("xyz");
+
+        assertNotNull(found);
+        assertEquals(auth.username(), found.username());
+    }
+
+    @Test
+    void getAuthFails() throws DataAccessException {
+        assertNull(db.getAuth("xyz"));
+    }
+
+    @Test
+    void getPassword() throws DataAccessException {
+        UserData user = new UserData("joe", "manysecrets", "j@j.com");
+        db.createUser(user);
+        assertEquals(user.password(), db.getPassword(user.username()));
+    }
+
+    @Test
+    void getPasswordFails() throws DataAccessException {
+        assertNull(db.getPassword("joe"));
     }
 }
