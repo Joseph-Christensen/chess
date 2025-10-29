@@ -16,18 +16,29 @@ public class SqlDataAccess implements DataAccess {
     @Override
     public void clear() throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "DROP DATABASE chess";
-            try (var preparedStatement = conn.prepareStatement(statement)) {
-                preparedStatement.executeUpdate();
+            String[] statements = {"TRUNCATE TABLE userData", "TRUNCATE TABLE authData", "TRUNCATE TABLE gameData"};
+            for (String statement : statements) {
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
             }
         } catch (SQLException | DataAccessException e) {
-            throw new DataAccessException(e.getMessage());
+            throw new DataAccessException("Error clearing tables: " + e.getMessage(), e);
         }
     }
 
     @Override
-    public void createUser(UserData user) {
-
+    public void createUser(UserData user) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            String[] statements = {"TRUNCATE TABLE userData", "TRUNCATE TABLE authData", "TRUNCATE TABLE gameData"};
+            for (String statement : statements) {
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new DataAccessException("Error clearing tables: " + e.getMessage(), e);
+        }
     }
 
     @Override

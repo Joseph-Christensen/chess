@@ -35,10 +35,15 @@ public class UserService {
         if (dataAccess.getUser(user.username()) != null) {
             throw new ChessException(403, "already taken");
         }
-        dataAccess.createUser(user);
-        String authToken = generateAuthToken();
-        dataAccess.createAuth(new AuthData(authToken, user.username()));
-        return dataAccess.getAuth(authToken);
+        try {
+            dataAccess.createUser(user);
+            String authToken = generateAuthToken();
+            dataAccess.createAuth(new AuthData(authToken, user.username()));
+            return dataAccess.getAuth(authToken);
+        }
+        catch (DataAccessException ex) {
+            throw new ChessException(500, ex.getMessage());
+        }
     }
 
     public AuthData login(LoginInfo user) throws ChessException {

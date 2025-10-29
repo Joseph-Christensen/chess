@@ -16,7 +16,7 @@ class DataAccessTest {
     }
 
     @Test
-    void createUser() {
+    void createUser() throws DataAccessException {
         DataAccess db = new MemoryDataAccess();
         UserData user = new UserData("joe", "manysecrets", "j@j.com");
         db.createUser(user);
