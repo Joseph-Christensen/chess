@@ -68,6 +68,14 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
+    public GameData createGame(String gameName) {
+        GameData game = new GameData(nextID, null, null, gameName, new ChessGame());
+        games.put(nextID, game);
+        nextID++;
+        return game;
+    }
+
+    @Override
     public GameData getGame(int id) {
         return games.get(id);
     }
@@ -75,14 +83,6 @@ public class MemoryDataAccess implements DataAccess {
     @Override
     public HashMap<Integer, GameData> allGames() {
         return games;
-    }
-
-    @Override
-    public GameData createGame(String gameName) {
-        GameData game = new GameData(nextID, null, null, gameName, new ChessGame());
-        games.put(nextID, game);
-        nextID++;
-        return game;
     }
 
     @Override

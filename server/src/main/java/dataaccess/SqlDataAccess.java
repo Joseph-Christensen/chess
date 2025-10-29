@@ -175,6 +175,31 @@ public class SqlDataAccess implements DataAccess {
     }
 
     @Override
+    public GameData createGame(String gameName) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            String statement = "INSERT INTO gameData (gameName, game) VALUES (?,?)";
+            try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
+                ps.setString(1, gameName);
+                ChessGame game = new ChessGame();
+                String chessString = game.toString();
+                ps.setString(2, chessString);
+                ps.executeUpdate();
+
+                try (var rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        int gameID = rs.getInt(1);
+                        return new GameData(gameID, null, null, gameName, game);
+                    } else {
+                        throw new DataAccessException("Failed to retrieve gameID");
+                    }
+                }
+            }
+        } catch (SQLException | DataAccessException ex) {
+            throw new DataAccessException("Error creating game: " + ex.getMessage(), ex);
+        }
+    }
+
+    @Override
     public GameData getGame(int id) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             String statement = "SELECT * FROM gameData WHERE gameID = ?";
@@ -221,31 +246,6 @@ public class SqlDataAccess implements DataAccess {
             throw new DataAccessException("Error retrieving all games: " + ex.getMessage(), ex);
         }
         return games;
-    }
-
-    @Override
-    public GameData createGame(String gameName) throws DataAccessException {
-        try (var conn = DatabaseManager.getConnection()) {
-            String statement = "INSERT INTO gameData (gameName, game) VALUES (?,?)";
-            try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
-                ps.setString(1, gameName);
-                ChessGame game = new ChessGame();
-                String chessString = game.toString();
-                ps.setString(2, chessString);
-                ps.executeUpdate();
-
-                try (var rs = ps.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        int gameID = rs.getInt(1);
-                        return new GameData(gameID, null, null, gameName, game);
-                    } else {
-                        throw new DataAccessException("Failed to retrieve gameID");
-                    }
-                }
-            }
-        } catch (SQLException | DataAccessException ex) {
-            throw new DataAccessException("Error creating game: " + ex.getMessage(), ex);
-        }
     }
 
     @Override
