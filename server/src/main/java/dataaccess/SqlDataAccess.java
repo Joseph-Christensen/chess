@@ -49,7 +49,7 @@ public class SqlDataAccess implements DataAccess {
     @Override
     public UserData getUser(String username) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            var ps = conn.prepareStatement("SELECT username, password, email FROM userData WHERE username = ?");
+            var ps = conn.prepareStatement("SELECT * FROM userData WHERE username = ?");
             ps.setString(1, username);
             try (var res = ps.executeQuery()) {
                 if (res.next()) {
@@ -84,7 +84,7 @@ public class SqlDataAccess implements DataAccess {
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            String statement = "SELECT authToken, username FROM authData WHERE authToken = ?";
+            String statement = "SELECT * FROM authData WHERE authToken = ?";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setString(1, authToken);
                 try (var res = ps.executeQuery()) {
@@ -131,7 +131,7 @@ public class SqlDataAccess implements DataAccess {
                 }
             }
         } catch (SQLException | DataAccessException ex) {
-            throw new DataAccessException("Error getting auth: " + ex.getMessage(), ex);
+            throw new DataAccessException("Error getting username: " + ex.getMessage(), ex);
         }
     }
 
@@ -150,7 +150,7 @@ public class SqlDataAccess implements DataAccess {
                 }
             }
         } catch (SQLException | DataAccessException ex) {
-            throw new DataAccessException("Error getting auth: " + ex.getMessage(), ex);
+            throw new DataAccessException("Error getting password: " + ex.getMessage(), ex);
         }
     }
 
@@ -159,7 +159,7 @@ public class SqlDataAccess implements DataAccess {
         var auths = new HashMap<String, AuthData>();
 
         try (var conn = DatabaseManager.getConnection()) {
-            String statement = "SELECT authToken, username FROM authData";
+            String statement = "SELECT * FROM authData";
             try (var ps = conn.prepareStatement(statement); var res = ps.executeQuery()) {
                 while (res.next()) {
                     String token = res.getString("authToken");
@@ -177,7 +177,7 @@ public class SqlDataAccess implements DataAccess {
     @Override
     public GameData getGame(int id) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            String statement = "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM gameData WHERE gameID = ?";
+            String statement = "SELECT * FROM gameData WHERE gameID = ?";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setInt(1, id);
                 try (var res = ps.executeQuery()) {
@@ -196,13 +196,31 @@ public class SqlDataAccess implements DataAccess {
                 }
             }
         } catch (SQLException | DataAccessException ex) {
-            throw new DataAccessException("Error getting auth: " + ex.getMessage(), ex);
+            throw new DataAccessException("Error getting game: " + ex.getMessage(), ex);
         }
     }
 
     @Override
     public HashMap<Integer, GameData> allGames() throws DataAccessException {
-        return null;
+        var games = new HashMap<Integer, GameData>();
+
+        try (var conn = DatabaseManager.getConnection()) {
+            String statement = "SELECT * FROM gameData";
+            try (var ps = conn.prepareStatement(statement); var res = ps.executeQuery()) {
+                while (res.next()) {
+                    int id = res.getInt("gameID");
+                    String white = res.getString("whiteUsername");
+                    String black = res.getString("blackUsername");
+                    String gameName = res.getString("gameName");
+                    ChessGame game = stringToGame(res.getString("game"));
+
+                    games.put(id, new GameData(id, white, black, gameName, game));
+                }
+            }
+        } catch (SQLException | DataAccessException ex) {
+            throw new DataAccessException("Error retrieving all games: " + ex.getMessage(), ex);
+        }
+        return games;
     }
 
     @Override
@@ -221,12 +239,12 @@ public class SqlDataAccess implements DataAccess {
                         int gameID = rs.getInt(1);
                         return new GameData(gameID, null, null, gameName, game);
                     } else {
-                        throw new DataAccessException("Failed to retrieve generated game ID");
+                        throw new DataAccessException("Failed to retrieve gameID");
                     }
                 }
             }
         } catch (SQLException | DataAccessException ex) {
-            throw new DataAccessException("Error creating user: " + ex.getMessage(), ex);
+            throw new DataAccessException("Error creating game: " + ex.getMessage(), ex);
         }
     }
 
