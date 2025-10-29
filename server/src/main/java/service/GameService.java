@@ -17,33 +17,41 @@ public class GameService {
     }
 
     public HashSet<GameRepresentation> listGames(String authToken) throws ChessException {
-        if (notAuthorized(authToken)) {
-            throw new ChessException(401, "unauthorized");
+        try {
+            if (notAuthorized(authToken)) {
+                throw new ChessException(401, "unauthorized");
+            }
+            var allGameData = dataAccess.allGames();
+            HashSet<GameRepresentation> games = new HashSet<>();
+            for (Map.Entry<Integer, GameData> entry : allGameData.entrySet()) {
+                GameRepresentation currGame = new GameRepresentation(
+                        entry.getValue().gameID(),
+                        entry.getValue().whiteUsername(),
+                        entry.getValue().blackUsername(),
+                        entry.getValue().gameName()
+                );
+                games.add(currGame);
+            }
+            return games;
+        } catch (DataAccessException ex) {
+            throw new ChessException(500, ex.getMessage());
         }
-        var allGameData = dataAccess.allGames();
-        HashSet<GameRepresentation> games = new HashSet<>();
-        for (Map.Entry<Integer, GameData> entry : allGameData.entrySet()) {
-            GameRepresentation currGame = new GameRepresentation(
-                    entry.getValue().gameID(),
-                    entry.getValue().whiteUsername(),
-                    entry.getValue().blackUsername(),
-                    entry.getValue().gameName()
-            );
-            games.add(currGame);
-        }
-        return games;
     }
 
     public CreateResponse createGame(GameEntry gameEntry, String authToken) throws ChessException {
-        if (notAuthorized(authToken)) {
-            throw new ChessException(401, "unauthorized");
-        }
-        if (gameEntry.gameName() == null || gameEntry.gameName().isBlank()) {
-            throw new ChessException(400, "bad request");
-        }
-        GameData game = dataAccess.createGame(gameEntry.gameName());
+        try {
+            if (notAuthorized(authToken)) {
+                throw new ChessException(401, "unauthorized");
+            }
+            if (gameEntry.gameName() == null || gameEntry.gameName().isBlank()) {
+                throw new ChessException(400, "bad request");
+            }
+            GameData game = dataAccess.createGame(gameEntry.gameName());
 
-        return new CreateResponse(game.gameID());
+            return new CreateResponse(game.gameID());
+        } catch (DataAccessException ex) {
+            throw new ChessException(500, ex.getMessage());
+        }
     }
 
     public void joinGame(JoinRequest joinRequest, String authToken) throws ChessException {

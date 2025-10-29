@@ -2,6 +2,7 @@ package service;
 
 import chess.ChessGame;
 import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import model.*;
 import org.junit.jupiter.api.Test;
@@ -49,7 +50,7 @@ class GameServiceTest {
     }
 
     @Test
-    void createGame() throws ChessException {
+    void createGame() throws ChessException, DataAccessException {
         DataAccess db = new MemoryDataAccess();
         UserService userService = new UserService(db);
         GameService gameService = new GameService(db);
@@ -80,7 +81,7 @@ class GameServiceTest {
     }
 
     @Test
-    void joinGame() throws ChessException {
+    void joinGame() throws ChessException, DataAccessException {
         DataAccess db = new MemoryDataAccess();
         UserService userService = new UserService(db);
         GameService gameService = new GameService(db);

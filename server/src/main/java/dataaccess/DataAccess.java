@@ -14,8 +14,8 @@ public interface DataAccess {
     String getUsername(String authToken) throws DataAccessException;
     String getPassword(String username) throws DataAccessException;
     HashMap<String,AuthData> allAuths() throws DataAccessException;
-    GameData getGame(int id);
-    HashMap<Integer, GameData> allGames();
-    GameData createGame(String gameName);
-    void updateGame(String username, boolean isWhite, int id);
+    GameData getGame(int id) throws DataAccessException;
+    HashMap<Integer, GameData> allGames() throws DataAccessException;
+    GameData createGame(String gameName) throws DataAccessException;
+    void updateGame(String username, boolean isWhite, int id) throws DataAccessException;
 }

@@ -3,6 +3,7 @@ package service;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.UUID;
 
@@ -36,7 +37,8 @@ public class UserService {
             if (dataAccess.getUser(user.username()) != null) {
                 throw new ChessException(403, "already taken");
             }
-            dataAccess.createUser(user);
+            UserData hashedUser = new UserData(user.username(), hashPassword(user.password()), user.email());
+            dataAccess.createUser(hashedUser);
             String authToken = generateAuthToken();
             dataAccess.createAuth(new AuthData(authToken, user.username()));
             return dataAccess.getAuth(authToken);
@@ -58,7 +60,7 @@ public class UserService {
             if (dataAccess.getUser(user.username()) == null) {
                 throw new ChessException(401, "unauthorized");
             }
-            if (!dataAccess.getPassword(user.username()).equals(user.password())) {
+            if (!verifyPassword(user.username(), user.password())) {
                 throw new ChessException(401, "unauthorized");
             }
             String authToken = generateAuthToken();
@@ -91,6 +93,14 @@ public class UserService {
 
     private String generateAuthToken() {
         return UUID.randomUUID().toString();
+    }
+
+    String hashPassword(String password) {
+        return BCrypt.hashpw(password, BCrypt.gensalt());
+    }
+
+    boolean verifyPassword(String username, String password) throws DataAccessException {
+        return BCrypt.checkpw(password, dataAccess.getPassword(username));
     }
 }
 

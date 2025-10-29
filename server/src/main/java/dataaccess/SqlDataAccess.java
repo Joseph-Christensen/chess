@@ -171,22 +171,22 @@ public class SqlDataAccess implements DataAccess {
     }
 
     @Override
-    public GameData getGame(int id) {
+    public GameData getGame(int id) throws DataAccessException {
         return null;
     }
 
     @Override
-    public HashMap<Integer, GameData> allGames() {
+    public HashMap<Integer, GameData> allGames() throws DataAccessException {
         return null;
     }
 
     @Override
-    public GameData createGame(String gameName) {
+    public GameData createGame(String gameName) throws DataAccessException {
         return null;
     }
 
     @Override
-    public void updateGame(String username, boolean isWhite, int id) {
+    public void updateGame(String username, boolean isWhite, int id) throws DataAccessException {
 
     }
 }
