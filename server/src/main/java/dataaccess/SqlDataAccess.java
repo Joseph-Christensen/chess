@@ -100,8 +100,21 @@ public class SqlDataAccess implements DataAccess {
     }
 
     @Override
-    public void removeAuth(String authToken) {
-
+    public void removeAuth(String authToken) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            String statement = "SELECT authToken, username FROM authData WHERE authToken = ?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setString(1, authToken);
+                try (var res = ps.executeQuery()) {
+                    if (res.next()) {
+                        String myAuth = res.getString("authToken");
+                        String myStr = res.getString("username");
+                    }
+                }
+            }
+        } catch (SQLException | DataAccessException ex) {
+            throw new DataAccessException("Error getting auth: " + ex.getMessage(), ex);
+        }
     }
 
     @Override
@@ -115,8 +128,23 @@ public class SqlDataAccess implements DataAccess {
     }
 
     @Override
-    public HashMap<String, AuthData> allAuths() {
-        return null;
+    public HashMap<String, AuthData> allAuths() throws DataAccessException {
+        var auths = new HashMap<String, AuthData>();
+
+        try (var conn = DatabaseManager.getConnection()) {
+            String statement = "SELECT authToken, username FROM authData";
+            try (var ps = conn.prepareStatement(statement); var res = ps.executeQuery()) {
+                while (res.next()) {
+                    String token = res.getString("authToken");
+                    String username = res.getString("username");
+
+                    auths.put(token, new AuthData(token, username));
+                }
+            }
+        } catch (SQLException | DataAccessException ex) {
+            throw new DataAccessException("Error retrieving all auths: " + ex.getMessage(), ex);
+        }
+        return auths;
     }
 
     @Override

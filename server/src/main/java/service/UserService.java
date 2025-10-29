@@ -71,14 +71,22 @@ public class UserService {
     }
 
     public void logout(String authToken) throws ChessException {
-        if (notAuthorized(authToken)) {
-            throw new ChessException(401, "unauthorized");
+        try {
+            if (notAuthorized(authToken)) {
+                throw new ChessException(401, "unauthorized");
+            }
+            dataAccess.removeAuth(authToken);
+        } catch (DataAccessException ex) {
+            throw new ChessException(500, ex.getMessage());
         }
-        dataAccess.removeAuth(authToken);
     }
 
-    private boolean notAuthorized(String authToken) {
-        return !dataAccess.allAuths().containsKey(authToken);
+    private boolean notAuthorized(String authToken) throws ChessException {
+        try {
+            return !dataAccess.allAuths().containsKey(authToken);
+        } catch (DataAccessException ex) {
+            throw new ChessException(500, ex.getMessage());
+        }
     }
 
     private String generateAuthToken() {

@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
 import model.*;
 
 import java.util.HashSet;
@@ -74,7 +75,11 @@ public class GameService {
         dataAccess.updateGame(username, isWhite, joinRequest.gameID());
     }
 
-    private boolean notAuthorized(String authToken) {
-        return !dataAccess.allAuths().containsKey(authToken);
+    private boolean notAuthorized(String authToken) throws ChessException {
+        try {
+            return !dataAccess.allAuths().containsKey(authToken);
+        } catch (DataAccessException ex) {
+            throw new ChessException(500, ex.getMessage());
+        }
     }
 }

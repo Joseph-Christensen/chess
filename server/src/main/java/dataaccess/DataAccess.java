@@ -10,10 +10,10 @@ public interface DataAccess {
     UserData getUser(String username) throws DataAccessException;
     void createAuth(AuthData user) throws DataAccessException;
     AuthData getAuth(String username) throws DataAccessException;
-    void removeAuth(String username);
+    void removeAuth(String username) throws DataAccessException;
     String getUsername(String authToken);
     String getPassword(String username);
-    HashMap<String,AuthData> allAuths();
+    HashMap<String,AuthData> allAuths() throws DataAccessException;
     GameData getGame(int id);
     HashMap<Integer, GameData> allGames();
     GameData createGame(String gameName);
