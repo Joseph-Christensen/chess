@@ -39,15 +39,21 @@ public class ServerFacade {
         handleResponse(response, null);
     }
 
-    private HttpRequest buildRequest(String method, String path, Object body, Object o) {
+    public void createGame(GameEntry entry, String authToken) throws ResponseException {
+        var request = buildRequest("POST", "/game", entry, authToken);
+        var response = sendRequest(request);
+        handleResponse(response, null);
+    }
+
+    private HttpRequest buildRequest(String method, String path, Object body, Object auth) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))
                 .method(method, makeRequestBody(body));
         if (body != null) {
             request.setHeader("Content-Type", "application/json");
         }
-        if (o != null) {
-            request.setHeader("Authorization", o.toString());
+        if (auth != null) {
+            request.setHeader("Authorization", auth.toString());
         }
         return request.build();
     }

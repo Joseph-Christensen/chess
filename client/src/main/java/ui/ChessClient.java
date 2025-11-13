@@ -159,13 +159,15 @@ public class ChessClient {
     }
 
     private String create(String[] params) {
-        if (state != State.SIGNEDIN) {
-            return invalidCommand();
+        if (state != State.SIGNEDIN) return invalidCommand();
+        if (params.length != 1) return "Please enter a name for the game.";
+        try {
+            GameEntry game = new GameEntry(params[0]);
+            server.createGame(game, authToken);
+            return success("Create", "created game with name " + game.gameName());
+        } catch (ResponseException ex) {
+            return failure("Create", ex);
         }
-        if (params.length != 1) {
-            return "Please enter a name for the game.";
-        }
-        return "Called Create";
     }
 
     private String list() {
