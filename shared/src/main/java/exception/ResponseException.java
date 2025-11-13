@@ -1,51 +1,30 @@
 package exception;
 
-import com.google.gson.Gson;
-
-import java.util.HashMap;
-import java.util.Map;
-
 public class ResponseException extends Exception {
-
     public enum Code {
-        ServerError,
-        ClientError,
+        BadRequest, Unauthorized, Forbidden, NotFound, ServerError, Unknown
     }
 
-    final private Code code;
+    private final Code code;
 
     public ResponseException(Code code, String message) {
         super(message);
         this.code = code;
     }
 
-    public String toJson() {
-        return new Gson().toJson(Map.of("message", getMessage(), "status", code));
-    }
-
-    public static ResponseException fromJson(String json) {
-        var map = new Gson().fromJson(json, HashMap.class);
-        var status = Code.valueOf(map.get("status").toString());
-        String message = map.get("message").toString();
-        return new ResponseException(status, message);
-    }
-
-    public Code code() {
+    public Code getCode() {
         return code;
     }
 
-    public static Code fromHttpStatusCode(int httpStatusCode) {
-        return switch (httpStatusCode) {
+    // Add this helper so we can easily map HTTP status codes
+    public static Code fromHttpStatusCode(int statusCode) {
+        return switch (statusCode) {
+            case 400 -> Code.BadRequest;
+            case 401 -> Code.Unauthorized;
+            case 403 -> Code.Forbidden;
+            case 404 -> Code.NotFound;
             case 500 -> Code.ServerError;
-            case 400 -> Code.ClientError;
-            default -> throw new IllegalArgumentException("Unknown HTTP status code: " + httpStatusCode);
-        };
-    }
-
-    public int toHttpStatusCode() {
-        return switch (code) {
-            case ServerError -> 500;
-            case ClientError -> 400;
+            default -> Code.Unknown;
         };
     }
 }

@@ -120,6 +120,14 @@ public class ChessClient {
         return "Please enter a valid command.\n  Type 'help' to view possible commands.";
     }
 
+    private String success(String action, String details) {
+        return String.format("%s successful: %s", action, details);
+    }
+
+    private String failure(String action, ResponseException ex) {
+        return String.format("%s failed: %s", action, ex.getMessage());
+    }
+
     private String register(String[] params) {
         if (state != State.SIGNEDOUT) return invalidCommand();
         if (params.length != 3) return "Please enter a username, password, and email.";
@@ -128,9 +136,9 @@ public class ChessClient {
             AuthData auth = server.register(user);
             authToken = auth.authToken();
             state = State.SIGNEDIN;
-            return "Registered & logged in as " + auth.username() + "\n  " + help();
+            return success("Register", "Logged in as " + auth.username()) + "\n  " + help();
         } catch (ResponseException ex) {
-            return "Registration failed: " + ex.getMessage();
+            return failure("Register", ex);
         }
     }
 
@@ -181,7 +189,7 @@ public class ChessClient {
             return "Please enter a valid color to join: \"BLACK\" or \"WHITE\"";
         }
         state = State.INGAME;
-        return "Called Join with id" + params[0] + " and color " + color + "\n  " + help();
+        return "Called Join with id " + params[0] + " and color " + color + "\n  " + help();
     }
 
     private String observe(String[] params) {
