@@ -51,8 +51,8 @@ public class ServerFacade {
     public HashSet<GameRepresentation> listGames(String authToken) throws ResponseException {
         var request = buildRequest("GET", "/game", null, authToken);
         var response = sendRequest(request);
-        var type = new TypeToken<HashSet<GameRepresentation>>() {}.getType();
-        return handleResponse(response, type);
+        GameListResponse games = handleResponse(response, GameListResponse.class);
+        return (games != null) ? games.getGames() : null;
     }
 
     private HttpRequest buildRequest(String method, String path, Object body, Object auth) {
@@ -85,30 +85,25 @@ public class ServerFacade {
     }
 
     private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws ResponseException {
-        return handleResponse(response, (Type) responseClass);
-    }
-
-    private <T> T handleResponse(HttpResponse<String> response, Type typeOfT) throws ResponseException {
         int status = response.statusCode();
         String body = response.body();
 
         if (isSuccessful(status)) {
-            if (typeOfT == null || body == null || body.isEmpty()) {
+            if (responseClass == null || body == null || body.isEmpty()) {
                 return null;
             }
-            return gson.fromJson(body, typeOfT);
+            return gson.fromJson(body, responseClass);
         }
 
         String message;
         switch (status) {
             case 400 -> message = "Bad request — please check your input.";
-            case 401 -> message = "Unauthorized";
-            case 403 -> message = "That name or slot is already taken.";
+            case 401 -> message = "Unauthorized — please log in again.";
+            case 403 -> message = "Forbidden — that name or slot is already taken.";
             case 404 -> message = "Not found.";
             case 500 -> message = "Server error — please try again later.";
             default -> message = "Unexpected error (" + status + ").";
         }
-
         throw new ResponseException(ResponseException.fromHttpStatusCode(status), message);
     }
 

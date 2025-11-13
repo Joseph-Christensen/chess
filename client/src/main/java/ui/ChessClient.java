@@ -5,6 +5,7 @@ import model.*;
 import server.ServerFacade;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
@@ -124,8 +125,8 @@ public class ChessClient {
         return String.format("%s successful: %s", action, details);
     }
 
-    private String failure(String action, ResponseException ex) {
-        return String.format("%s failed: %s", action, ex.getMessage());
+    private String failure(String action, String message) {
+        return String.format("%s failed: %s", action, message);
     }
 
     private String register(String[] params) {
@@ -139,7 +140,7 @@ public class ChessClient {
             state = State.SIGNEDIN;
             return success("Register", "logged in as " + username + ".") + "\n  " + help();
         } catch (ResponseException ex) {
-            return failure("Register", ex);
+            return failure("Register", ex.getMessage());
         }
     }
 
@@ -154,7 +155,7 @@ public class ChessClient {
             state = State.SIGNEDIN;
             return success("Login", "logged in as " + username + ".") + "\n  " + help();
         } catch (ResponseException ex) {
-            return failure("Login", ex);
+            return failure("Login", ex.getMessage());
         }
     }
 
@@ -166,18 +167,33 @@ public class ChessClient {
             server.createGame(game, authToken);
             return success("Create", "created game with name " + game.gameName());
         } catch (ResponseException ex) {
-            return failure("Create", ex);
+            return failure("Create", ex.getMessage());
         }
     }
 
     private String list() {
         if (state != State.SIGNEDIN) return invalidCommand();
         try {
-            server.listGames(authToken);
+            HashSet<GameRepresentation> games = server.listGames(authToken);
+            if (games == null || games.isEmpty()) {
+                return "No games found.";
+            }
+
+            var sb = new StringBuilder();
+            int counter = 0;
+            for (GameRepresentation game : games) {
+                counter++;
+                sb.append(String.format("\n  [%d] %s  (White: %s | Black: %s )",
+                        counter,
+                        game.gameName(),
+                        game.whiteUsername() != null ? game.whiteUsername() : "—",
+                        game.blackUsername() != null ? game.blackUsername() : "—")
+                );
+            }
+            return success("List", sb.toString());
         } catch (ResponseException ex) {
-            return failure("List", ex);
+            return failure("List", ex.getMessage());
         }
-        return "Called List";
     }
 
     private String join(String[] params) {
@@ -225,7 +241,7 @@ public class ChessClient {
             state = State.SIGNEDOUT;
             return success("Logout", "logged out.")+ "\n  " + help();
         } catch (ResponseException ex) {
-            return failure("Logout", ex);
+            return failure("Logout", ex.getMessage());
         }
     }
 
