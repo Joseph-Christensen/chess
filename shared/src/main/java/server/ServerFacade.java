@@ -80,13 +80,16 @@ public class ServerFacade {
     }
 
     public void observeGame(int gameID, String authToken) throws ResponseException {
-        HashSet<GameRepresentation> games = listGames(authToken);
-        for (int i = 0; i < games.size(); i++) {
-            if (i + 1 == gameID) {
-                return;
-            }
+        HashSet<GameRepresentation> gamesSet = listGames(authToken);
+        if (gamesSet == null || gamesSet.isEmpty()) {
+            throw new ResponseException(ResponseException.Code.BadRequest, "No games available");
         }
-        throw new ResponseException(ResponseException.Code.BadRequest, "Invalid game ID");
+
+        List<GameRepresentation> games = new ArrayList<>(gamesSet);
+
+        if (gameID < 1 || gameID > games.size()) {
+            throw new ResponseException(ResponseException.Code.BadRequest, "Invalid game ID");
+        }
     }
 
     private HttpRequest buildRequest(String method, String path, Object body, Object auth) {
