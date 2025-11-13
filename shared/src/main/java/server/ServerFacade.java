@@ -9,7 +9,9 @@ import java.net.http.*;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
@@ -56,19 +58,22 @@ public class ServerFacade {
     public void joinGame(JoinRequest joinRequest, String authToken) throws ResponseException {
         int idInput = joinRequest.gameID();
         String color = joinRequest.playerColor();
-        HashSet<GameRepresentation> games = listGames(authToken);
-        int counter = 0;
-        int id = 0;
-        for (GameRepresentation game : games) {
-            counter++;
-            if (counter == idInput) {
-                id = game.gameID();
-            }
+
+        HashSet<GameRepresentation> gamesSet = listGames(authToken);
+        if (gamesSet == null || gamesSet.isEmpty()) {
+            throw new ResponseException(ResponseException.Code.BadRequest, "No games available");
         }
-        if (id == 0) {
+
+        List<GameRepresentation> games = new ArrayList<>(gamesSet);
+
+        if (idInput < 1 || idInput > games.size()) {
             throw new ResponseException(ResponseException.Code.BadRequest, "Invalid game ID");
         }
-        JoinRequest newReq = new JoinRequest(color, id);
+
+        int gameID = games.get(idInput - 1).gameID();
+
+        JoinRequest newReq = new JoinRequest(color, gameID);
+
         var request = buildRequest("PUT", "/game", newReq, authToken);
         var response = sendRequest(request);
         handleResponse(response, null);
@@ -99,7 +104,7 @@ public class ServerFacade {
 
     private BodyPublisher makeRequestBody(Object request) {
         if (request != null) {
-            return BodyPublishers.ofString(new Gson().toJson(request));
+            return BodyPublishers.ofString(gson.toJson(request));
         } else {
             return BodyPublishers.noBody();
         }

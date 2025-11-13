@@ -4,9 +4,7 @@ import exception.ResponseException;
 import model.*;
 import server.ServerFacade;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Scanner;
+import java.util.*;
 
 import static ui.EscapeSequences.*;
 
@@ -169,7 +167,7 @@ public class ChessClient {
         try {
             GameEntry game = new GameEntry(params[0]);
             server.createGame(game, authToken);
-            return success("Create", "created\" " + game.gameName() + "\"");
+            return success("Create", "created \"" + game.gameName() + "\"");
         } catch (ResponseException ex) {
             return failure("Create", ex.getMessage());
         }
@@ -178,17 +176,19 @@ public class ChessClient {
     private String list() {
         if (state != State.SIGNEDIN) return invalidCommand();
         try {
-            HashSet<GameRepresentation> games = server.listGames(authToken);
-            if (games == null || games.isEmpty()) {
+            HashSet<GameRepresentation> gamesSet = server.listGames(authToken);
+            if (gamesSet == null || gamesSet.isEmpty()) {
                 return "No games found.";
             }
 
+            List<GameRepresentation> games = new ArrayList<>(gamesSet);
+
             var sb = new StringBuilder();
-            int counter = 0;
-            for (GameRepresentation game : games) {
-                counter++;
+            for (int i = 0; i < games.size(); i++) {
+                GameRepresentation game = games.get(i);
+                int displayID = i + 1;
                 sb.append(String.format("\n  [%d] %s (White: %s | Black: %s )",
-                        counter,
+                        displayID,
                         game.gameName(),
                         game.whiteUsername() != null ? game.whiteUsername() : "—",
                         game.blackUsername() != null ? game.blackUsername() : "—")
