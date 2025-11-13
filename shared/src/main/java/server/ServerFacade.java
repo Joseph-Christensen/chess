@@ -13,6 +13,7 @@ import java.net.http.HttpResponse.BodyHandlers;
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
     private final String serverUrl;
+    private final Gson gson = new Gson();
 
     public ServerFacade(String url) {
         serverUrl = url;
@@ -21,7 +22,7 @@ public class ServerFacade {
     // Put Methods Here
 
     public AuthData register(UserData user) throws ResponseException {
-        var request = buildRequest("POST", "user", user, null);
+        var request = buildRequest("POST", "/user", user, null);
         var response = sendRequest(request);
         return handleResponse(response, AuthData.class);
     }
@@ -55,21 +56,27 @@ public class ServerFacade {
     }
 
     private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws ResponseException {
-        var status = response.statusCode();
-        if (!isSuccessful(status)) {
-            var body = response.body();
-            if (body != null) {
-                throw ResponseException.fromJson(body);
+        int status = response.statusCode();
+        String body = response.body();
+
+        if (isSuccessful(status)) {
+            if (responseClass == null || body == null || body.isEmpty()) {
+                return null;
             }
-
-            throw new ResponseException(ResponseException.fromHttpStatusCode(status), "other failure: " + status);
+            return gson.fromJson(body, responseClass);
         }
 
-        if (responseClass != null) {
-            return new Gson().fromJson(response.body(), responseClass);
+        String message;
+        switch (status) {
+            case 400 -> message = "Bad request — please check your input.";
+            case 401 -> message = "Unauthorized — please log in again.";
+            case 403 -> message = "Forbidden — that name or slot is already taken.";
+            case 404 -> message = "Not found.";
+            case 500 -> message = "Server error — please try again later.";
+            default -> message = "Unexpected error (" + status + ").";
         }
 
-        return null;
+        throw new ResponseException(ResponseException.fromHttpStatusCode(status), message);
     }
 
     private boolean isSuccessful(int status) {
