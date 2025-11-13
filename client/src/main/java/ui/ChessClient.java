@@ -239,7 +239,7 @@ public class ChessClient {
         try {
             state = State.INGAME;
             server.observeGame(gameID, authToken);
-            return success("Observe", "observing game " + gameID);
+            return success("Observe", "observing game " + gameID + "\n  " + help());
         } catch (ResponseException ex) {
             String message = (ex.getCode() == ResponseException.fromHttpStatusCode(400)) ?
                     "Game id \"" + gameID + "\" doesn't exist." : ex.getMessage();

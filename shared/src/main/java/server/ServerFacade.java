@@ -76,11 +76,8 @@ public class ServerFacade {
 
     public void observeGame(int gameID, String authToken) throws ResponseException {
         HashSet<GameRepresentation> games = listGames(authToken);
-        int counter = 0;
-        int id = 0;
-        for (GameRepresentation game : games) {
-            counter++;
-            if (counter == gameID) {
+        for (int i = 0; i < games.size(); i++) {
+            if (i + 1 == gameID) {
                 return;
             }
         }
