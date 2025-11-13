@@ -33,6 +33,11 @@ public class ServerFacade {
         return handleResponse(response, AuthData.class);
     }
 
+    public void logout(String authToken) throws ResponseException {
+        var request = buildRequest("DELETE", "/session", null, authToken);
+        var response = sendRequest(request);
+        handleResponse(response, null);
+    }
 
     private HttpRequest buildRequest(String method, String path, Object body, Object o) {
         var request = HttpRequest.newBuilder()
@@ -40,6 +45,9 @@ public class ServerFacade {
                 .method(method, makeRequestBody(body));
         if (body != null) {
             request.setHeader("Content-Type", "application/json");
+        }
+        if (o != null) {
+            request.setHeader("Authorization", o.toString());
         }
         return request.build();
     }
@@ -74,7 +82,7 @@ public class ServerFacade {
         String message;
         switch (status) {
             case 400 -> message = "Bad request — please check your input.";
-            case 401 -> message = "Unauthorized — please log in again.";
+            case 401 -> message = "Unauthorized";
             case 403 -> message = "That name or slot is already taken.";
             case 404 -> message = "Not found.";
             case 500 -> message = "Server error — please try again later.";

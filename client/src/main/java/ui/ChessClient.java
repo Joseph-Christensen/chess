@@ -15,6 +15,7 @@ public class ChessClient {
     private State state = State.SIGNEDOUT;
     private final ServerFacade server;
     private String authToken = null;
+    private String username = null;
 
     public ChessClient (String serverURL) {
         server = new ServerFacade(serverURL);
@@ -134,9 +135,10 @@ public class ChessClient {
         try {
             var user = new UserData(params[0], params[1], params[2]);
             AuthData auth = server.register(user);
+            username = auth.username();
             authToken = auth.authToken();
             state = State.SIGNEDIN;
-            return success("Register", "Logged in as " + auth.username()) + "\n  " + help();
+            return success("Register", "logged in as " + username + ".") + "\n  " + help();
         } catch (ResponseException ex) {
             return failure("Register", ex);
         }
@@ -148,9 +150,10 @@ public class ChessClient {
         try {
             LoginInfo info = new LoginInfo(params[0], params[1]);
             AuthData auth = server.login(info);
+            username = auth.username();
             authToken = auth.authToken();
             state = State.SIGNEDIN;
-            return success("Login", "Logged in as " + auth.username()) + "\n  " + help();
+            return success("Login", "logged in as " + username + ".") + "\n  " + help();
         } catch (ResponseException ex) {
             return failure("Login", ex);
         }
@@ -210,11 +213,16 @@ public class ChessClient {
     }
 
     private String logout() {
-        if (state != State.SIGNEDIN) {
-            return invalidCommand();
+        if (state != State.SIGNEDIN) return invalidCommand();
+        try {
+            server.logout(authToken);
+            username = null;
+            authToken = null;
+            state = State.SIGNEDOUT;
+            return success("Logout", "logged out.")+ "\n  " + help();
+        } catch (ResponseException ex) {
+            return failure("Logout", ex);
         }
-        state = State.SIGNEDOUT;
-        return "Logged Out\n  " + help();
     }
 
     private String leave() {
