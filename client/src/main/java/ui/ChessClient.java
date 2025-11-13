@@ -15,7 +15,7 @@ public class ChessClient {
     public ChessClient () {}
 
     public void repl() {
-        System.out.print(help());
+        System.out.print("  " + help());
 
         Scanner scanner = new Scanner(System.in);
         String line = "";
@@ -44,6 +44,10 @@ public class ChessClient {
                 case "register" -> register(params);
                 case "login" -> login(params);
                 case "create" -> create(params);
+                case "list" -> list();
+                case "join" -> join(params);
+                case "observe" -> observe(params);
+                case "logout" -> logout();
                 default -> "Please enter a valid command.\n  Type 'help' to view possible commands.";
             };
         } catch (Exception ex) {
@@ -101,32 +105,32 @@ public class ChessClient {
 
     private String register(String[] params) {
         state = State.SIGNEDIN;
-        return "Called Register";
+        return "Called Register\n  " + help();
     }
 
     private String login(String[] params) {
         state = State.SIGNEDIN;
-        return "Called Login";
+        return "Called Login\n  " + help();
     }
 
     private String create(String[] params) {
-        return "";
+        return "Called Create";
     }
 
-    private String list(String[] params) {
-        return "";
+    private String list() {
+        return "Called List";
     }
 
     private String join(String[] params) {
-        return "";
+        return "Called Join";
     }
 
     private String observe(String[] params) {
-        return "";
+        return "Called Observe";
     }
 
-    private String logout(String[] params) {
-        return "";
+    private String logout() {
+        state = State.SIGNEDOUT;
+        return "Called Logout\n  " + help();
     }
-
 }
