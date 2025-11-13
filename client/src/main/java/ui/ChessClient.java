@@ -1,6 +1,7 @@
 package ui;
 
 import exception.ResponseException;
+import server.ServerFacade;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -11,8 +12,11 @@ import static ui.EscapeSequences.*;
 public class ChessClient {
 
     private State state = State.SIGNEDOUT;
+    private final ServerFacade server;
 
-    public ChessClient () {}
+    public ChessClient (String serverURL) {
+        server = new ServerFacade(serverURL);
+    }
 
     public void repl() {
         System.out.print("  " + help());
@@ -104,16 +108,25 @@ public class ChessClient {
     }
 
     private String register(String[] params) {
+        if (params.length != 3) {
+            return "Please enter a username, password, and email.";
+        }
         state = State.SIGNEDIN;
-        return "Called Register\n  " + help();
+        return "Logged In\n  " + help();
     }
 
     private String login(String[] params) {
+        if (params.length != 2) {
+            return "Please enter a username and password.";
+        }
         state = State.SIGNEDIN;
-        return "Called Login\n  " + help();
+        return "Logged In\n  " + help();
     }
 
     private String create(String[] params) {
+        if (params.length != 1) {
+            return "Please enter a name for the game.";
+        }
         return "Called Create";
     }
 
@@ -122,15 +135,21 @@ public class ChessClient {
     }
 
     private String join(String[] params) {
+        if (params.length != 2) {
+            return "Please enter a game id and color to join.";
+        }
         return "Called Join";
     }
 
     private String observe(String[] params) {
+        if (params.length != 1) {
+            return "Please enter a game id.";
+        }
         return "Called Observe";
     }
 
     private String logout() {
         state = State.SIGNEDOUT;
-        return "Called Logout\n  " + help();
+        return "Logged Out\n  " + help();
     }
 }
