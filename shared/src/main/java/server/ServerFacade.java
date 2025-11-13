@@ -62,7 +62,7 @@ public class ServerFacade {
         for (GameRepresentation game : games) {
             counter++;
             if (counter == idInput) {
-                id = counter;
+                id = game.gameID();
             }
         }
         if (id == 0) {
@@ -72,6 +72,19 @@ public class ServerFacade {
         var request = buildRequest("PUT", "/game", newReq, authToken);
         var response = sendRequest(request);
         handleResponse(response, null);
+    }
+
+    public void observeGame(int gameID, String authToken) throws ResponseException {
+        HashSet<GameRepresentation> games = listGames(authToken);
+        int counter = 0;
+        int id = 0;
+        for (GameRepresentation game : games) {
+            counter++;
+            if (counter == gameID) {
+                return;
+            }
+        }
+        throw new ResponseException(ResponseException.Code.BadRequest, "Invalid game ID");
     }
 
     private HttpRequest buildRequest(String method, String path, Object body, Object auth) {

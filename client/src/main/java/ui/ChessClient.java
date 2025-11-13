@@ -140,7 +140,7 @@ public class ChessClient {
             state = State.SIGNEDIN;
             return success("Register", "logged in as " + username + ".") + "\n  " + help();
         } catch (ResponseException ex) {
-            String message = (ex.getCode() == ResponseException.Code.Forbidden) ?
+            String message = (ex.getCode() == ResponseException.fromHttpStatusCode(403)) ?
                     "Username already taken." : ex.getMessage();
             return failure("Register", message);
         }
@@ -157,7 +157,7 @@ public class ChessClient {
             state = State.SIGNEDIN;
             return success("Login", "logged in as " + username + ".") + "\n  " + help();
         } catch (ResponseException ex) {
-            String message = (ex.getCode() == ResponseException.Code.Unauthorized) ?
+            String message = (ex.getCode() == ResponseException.fromHttpStatusCode(401)) ?
                     "Invalid username or password." : ex.getMessage();
             return failure("Login", message);
         }
@@ -212,28 +212,39 @@ public class ChessClient {
         } else {
             return "Please enter a valid color to join: \"BLACK\" or \"WHITE\"";
         }
+        int gameID = Integer.parseInt(params[0]);
         try {
-            JoinRequest req = new JoinRequest(color, Integer.parseInt(params[0]));
+            JoinRequest req = new JoinRequest(color, gameID);
             server.joinGame(req, authToken);
             state = State.INGAME;
             return success("Join", "joined game " + req.gameID() + " as " + req.playerColor() + "\n  " + help());
         } catch (ResponseException ex) {
-            return failure("Join", ex.getMessage());
+            String message;
+            if (ex.getCode() == ResponseException.fromHttpStatusCode(403)) {
+                message = color + " in game " + gameID + " is already taken.";
+            } else if (ex.getCode() == ResponseException.fromHttpStatusCode(400)) {
+                message = "Game id \"" + gameID + "\" doesn't exist.";
+            } else {
+                message = ex.getMessage();
+            }
+            return failure("Join", message);
         }
     }
 
     private String observe(String[] params) {
-        if (state != State.SIGNEDIN) {
-            return invalidCommand();
+        if (state != State.SIGNEDIN) return invalidCommand();
+        if (params.length != 1) return "Please enter a game id.";
+        if (!params[0].matches("\\d+")) return "Please enter a number for your game id.";
+        int gameID = Integer.parseInt(params[0]);
+        try {
+            state = State.INGAME;
+            server.observeGame(gameID, authToken);
+            return success("Observe", "observing game " + gameID);
+        } catch (ResponseException ex) {
+            String message = (ex.getCode() == ResponseException.fromHttpStatusCode(400)) ?
+                    "Game id \"" + gameID + "\" doesn't exist." : ex.getMessage();
+            return failure("Observe", message);
         }
-        if (params.length != 1) {
-            return "Please enter a game id.";
-        }
-        if (!params[0].matches("\\d+")) {
-            return "Please enter a valid game id: \"" + params[0] + "\"";
-        }
-        state = State.INGAME;
-        return "Called Observe\n  " + help();
     }
 
     private String logout() {
