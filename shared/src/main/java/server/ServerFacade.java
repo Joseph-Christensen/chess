@@ -1,6 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import exception.ResponseException;
 import model.*;
 
@@ -9,6 +10,8 @@ import java.net.http.*;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.lang.reflect.Type;
+import java.util.HashSet;
 
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
@@ -45,6 +48,13 @@ public class ServerFacade {
         handleResponse(response, null);
     }
 
+    public HashSet<GameRepresentation> listGames(String authToken) throws ResponseException {
+        var request = buildRequest("GET", "/game", null, authToken);
+        var response = sendRequest(request);
+        var type = new TypeToken<HashSet<GameRepresentation>>() {}.getType();
+        return handleResponse(response, type);
+    }
+
     private HttpRequest buildRequest(String method, String path, Object body, Object auth) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))
@@ -75,14 +85,18 @@ public class ServerFacade {
     }
 
     private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws ResponseException {
+        return handleResponse(response, (Type) responseClass);
+    }
+
+    private <T> T handleResponse(HttpResponse<String> response, Type typeOfT) throws ResponseException {
         int status = response.statusCode();
         String body = response.body();
 
         if (isSuccessful(status)) {
-            if (responseClass == null || body == null || body.isEmpty()) {
+            if (typeOfT == null || body == null || body.isEmpty()) {
                 return null;
             }
-            return gson.fromJson(body, responseClass);
+            return gson.fromJson(body, typeOfT);
         }
 
         String message;

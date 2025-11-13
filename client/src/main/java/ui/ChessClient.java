@@ -171,8 +171,11 @@ public class ChessClient {
     }
 
     private String list() {
-        if (state != State.SIGNEDIN) {
-            return invalidCommand();
+        if (state != State.SIGNEDIN) return invalidCommand();
+        try {
+            server.listGames(authToken);
+        } catch (ResponseException ex) {
+            return failure("List", ex);
         }
         return "Called List";
     }
