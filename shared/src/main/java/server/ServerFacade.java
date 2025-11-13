@@ -20,9 +20,15 @@ public class ServerFacade {
 
     // Put Methods Here
 
+    public AuthData register(UserData user) throws ResponseException {
+        var request = buildRequest("POST", "user", user, null);
+        var response = sendRequest(request);
+        return handleResponse(response, AuthData.class);
+    }
 
 
-    private HttpRequest buildRequest(String method, String path, Object body) {
+
+    private HttpRequest buildRequest(String method, String path, Object body, Object o) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))
                 .method(method, makeRequestBody(body));

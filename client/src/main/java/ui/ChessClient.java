@@ -1,6 +1,7 @@
 package ui;
 
 import exception.ResponseException;
+import model.*;
 import server.ServerFacade;
 
 import java.util.Arrays;
@@ -13,6 +14,7 @@ public class ChessClient {
 
     private State state = State.SIGNEDOUT;
     private final ServerFacade server;
+    private String authToken = null;
 
     public ChessClient (String serverURL) {
         server = new ServerFacade(serverURL);
@@ -29,7 +31,7 @@ public class ChessClient {
 
             try {
                 String result = eval(line);
-                System.out.print(SET_TEXT_COLOR_BLUE + "  " + result);
+                System.out.print(SET_TEXT_COLOR_MAGENTA + "  " + result);
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.print(msg);
@@ -53,7 +55,7 @@ public class ChessClient {
                 case "observe" -> observe(params);
                 case "logout" -> logout();
                 case "leave" -> leave();
-                default -> "Please enter a valid command.\n  Type 'help' to view possible commands.";
+                default -> invalidCommand();
             };
         } catch (Exception ex) {
             return ex.getMessage();
@@ -114,20 +116,27 @@ public class ChessClient {
         }
     }
 
+    private String invalidCommand() {
+        return "Please enter a valid command.\n  Type 'help' to view possible commands.";
+    }
+
     private String register(String[] params) {
-        if (state != State.SIGNEDOUT) {
-            return "Please enter a valid command.\n  Type 'help' to view possible commands.";
+        if (state != State.SIGNEDOUT) return invalidCommand();
+        if (params.length != 3) return "Please enter a username, password, and email.";
+        try {
+            var user = new UserData(params[0], params[1], params[2]);
+            AuthData auth = server.register(user);
+            authToken = auth.authToken();
+            state = State.SIGNEDIN;
+            return "Registered & logged in as " + auth.username() + "\n  " + help();
+        } catch (ResponseException ex) {
+            return "Registration failed: " + ex.getMessage();
         }
-        if (params.length != 3) {
-            return "Please enter a username, password, and email.";
-        }
-        state = State.SIGNEDIN;
-        return "Logged In\n  " + help();
     }
 
     private String login(String[] params) {
         if (state != State.SIGNEDOUT) {
-            return "Please enter a valid command.\n  Type 'help' to view possible commands.";
+            return invalidCommand();
         }
         if (params.length != 2) {
             return "Please enter a username and password.";
@@ -138,7 +147,7 @@ public class ChessClient {
 
     private String create(String[] params) {
         if (state != State.SIGNEDIN) {
-            return "Please enter a valid command.\n  Type 'help' to view possible commands.";
+            return invalidCommand();
         }
         if (params.length != 1) {
             return "Please enter a name for the game.";
@@ -148,14 +157,14 @@ public class ChessClient {
 
     private String list() {
         if (state != State.SIGNEDIN) {
-            return "Please enter a valid command.\n  Type 'help' to view possible commands.";
+            return invalidCommand();
         }
         return "Called List";
     }
 
     private String join(String[] params) {
         if (state != State.SIGNEDIN) {
-            return "Please enter a valid command.\n  Type 'help' to view possible commands.";
+            return invalidCommand();
         }
         if (params.length != 2) {
             return "Please enter a game id and color to join.";
@@ -177,7 +186,7 @@ public class ChessClient {
 
     private String observe(String[] params) {
         if (state != State.SIGNEDIN) {
-            return "Please enter a valid command.\n  Type 'help' to view possible commands.";
+            return invalidCommand();
         }
         if (params.length != 1) {
             return "Please enter a game id.";
@@ -191,7 +200,7 @@ public class ChessClient {
 
     private String logout() {
         if (state != State.SIGNEDIN) {
-            return "Please enter a valid command.\n  Type 'help' to view possible commands.";
+            return invalidCommand();
         }
         state = State.SIGNEDOUT;
         return "Logged Out\n  " + help();
@@ -199,7 +208,7 @@ public class ChessClient {
 
     private String leave() {
         if (state != State.INGAME) {
-            return "Please enter a valid command.\n  Type 'help' to view possible commands.";
+            return invalidCommand();
         }
         state = State.SIGNEDIN;
         return "Left Game\n  " + help();
