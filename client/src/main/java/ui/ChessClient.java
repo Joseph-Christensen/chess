@@ -1,61 +1,69 @@
 package ui;
 
+import exception.ResponseException;
+
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
 
 public class ChessClient {
 
-    private static State state = State.SIGNEDOUT;
+    private State state = State.SIGNEDOUT;
 
-    public static void main(String[] args) {
-        run();
-    }
+    public ChessClient () {}
 
-    public static void run() {
-        System.out.println(ERASE_SCREEN + " Welcome to the pet store. Sign in to start.");
+    public void repl() {
         System.out.print(help());
 
         Scanner scanner = new Scanner(System.in);
-        var result = "";
-        while (!result.equals("quit")) {
+        String line = "";
+        while (!line.equals("quit")) {
             printPrompt();
-            String line = scanner.nextLine();
-
-            if (state == State.SIGNEDOUT) {
-                state = State.SIGNEDIN;
-            } else {
-                state = State.SIGNEDOUT;
-            }
+            line = scanner.nextLine();
 
             try {
-                result = eval(line);
-                System.out.print(SET_TEXT_COLOR_BLUE + result);
+                String result = eval(line);
+                System.out.print(SET_TEXT_COLOR_BLUE + "  " + result);
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.print(msg);
             }
         }
-        System.out.println();
     }
 
-    public static String eval(String line) {
-        if (line.equalsIgnoreCase("help")) {
-            System.out.print(help());
+    private String eval(String input) {
+        try {
+            String[] tokens = input.toLowerCase().trim().split("\\s+");
+            String flag = tokens[0];
+            String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
+            return switch (flag) {
+                case "help" -> help();
+                case "quit" -> "Exiting Client";
+                case "register" -> "Called Register";
+                case "login" -> "Called Login";
+                default -> "Please enter a valid command.\n  Type 'help' to view possible commands.";
+            };
+        } catch (Exception ex) {
+            return ex.getMessage();
         }
-        return line;
     }
 
-    private static void printPrompt() {
-        System.out.print("\n" + RESET_TEXT_BOLD_FAINT + ">>> " + SET_TEXT_COLOR_GREEN );
+    private void printPrompt() {
+        System.out.print("\n" + SET_TEXT_COLOR_WHITE + printStatus() + " >>> " + SET_TEXT_COLOR_GREEN );
     }
 
-    public static String help() {
+    private String help() {
         if (state == State.SIGNEDOUT) {
-            return """
-                    - signIn <yourname>
-                    - quit
-                    """;
+            return  SET_TEXT_COLOR_BLUE + "register <USERNAME> <PASSWORD> <EMAIL> - " +
+                    SET_TEXT_COLOR_WHITE + "creates a new account\n" +
+                    SET_TEXT_COLOR_BLUE + "  login <USERNAME> <PASSWORD> - " +
+                    SET_TEXT_COLOR_WHITE + "logs you into an existing account\n" +
+                    SET_TEXT_COLOR_BLUE + "  quit - " +
+                    SET_TEXT_COLOR_WHITE + "exits the chess client\n" +
+                    SET_TEXT_COLOR_BLUE + "  help - " +
+                    SET_TEXT_COLOR_WHITE + "lists possible commands";
         }
         return """
                 - list
@@ -67,4 +75,13 @@ public class ChessClient {
                 """;
     }
 
+    private String printStatus() {
+        if (state == State.SIGNEDOUT) {
+            return "[LOGGED_OUT]";
+        } else if (state == State.SIGNEDIN) {
+            return "[LOGGED_IN]";
+        } else {
+            return "[IN_GAME]";
+        }
+    }
 }

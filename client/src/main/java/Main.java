@@ -1,9 +1,12 @@
-import chess.*;
+import ui.*;
+
+import static ui.EscapeSequences.*;
 
 public class Main {
     public static void main(String[] args) {
         // start the repl here
-
-        System.out.println("♕ 240 Chess Client: ");
+        System.out.println(SET_TEXT_COLOR_WHITE + "♕ Welcome to 240 Chess ♕");
+        ChessClient client = new ChessClient();
+        client.repl();
     }
 }
