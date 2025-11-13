@@ -140,7 +140,9 @@ public class ChessClient {
             state = State.SIGNEDIN;
             return success("Register", "logged in as " + username + ".") + "\n  " + help();
         } catch (ResponseException ex) {
-            return failure("Register", ex.getMessage());
+            String message = (ex.getCode() == ResponseException.Code.Forbidden) ?
+                    "Username already taken." : ex.getMessage();
+            return failure("Register", message);
         }
     }
 
@@ -155,7 +157,9 @@ public class ChessClient {
             state = State.SIGNEDIN;
             return success("Login", "logged in as " + username + ".") + "\n  " + help();
         } catch (ResponseException ex) {
-            return failure("Login", ex.getMessage());
+            String message = (ex.getCode() == ResponseException.Code.Unauthorized) ?
+                    "Invalid username or password." : ex.getMessage();
+            return failure("Login", message);
         }
     }
 
@@ -165,7 +169,7 @@ public class ChessClient {
         try {
             GameEntry game = new GameEntry(params[0]);
             server.createGame(game, authToken);
-            return success("Create", "created game with name " + game.gameName());
+            return success("Create", "created\" " + game.gameName() + "\"");
         } catch (ResponseException ex) {
             return failure("Create", ex.getMessage());
         }
@@ -183,7 +187,7 @@ public class ChessClient {
             int counter = 0;
             for (GameRepresentation game : games) {
                 counter++;
-                sb.append(String.format("\n  [%d] %s  (White: %s | Black: %s )",
+                sb.append(String.format("\n  [%d] %s (White: %s | Black: %s )",
                         counter,
                         game.gameName(),
                         game.whiteUsername() != null ? game.whiteUsername() : "—",
@@ -197,15 +201,9 @@ public class ChessClient {
     }
 
     private String join(String[] params) {
-        if (state != State.SIGNEDIN) {
-            return invalidCommand();
-        }
-        if (params.length != 2) {
-            return "Please enter a game id and color to join.";
-        }
-        if (!params[0].matches("\\d+")) {
-            return "Please enter a valid game id: \"" + params[0] + "\"";
-        }
+        if (state != State.SIGNEDIN) return invalidCommand();
+        if (params.length != 2) return "Please enter a game id and color to join.";
+        if (!params[0].matches("\\d+")) return "Please enter a number for your game id.";
         String color;
         if (params[1].toLowerCase().matches("black")) {
             color = "BLACK";
@@ -214,8 +212,14 @@ public class ChessClient {
         } else {
             return "Please enter a valid color to join: \"BLACK\" or \"WHITE\"";
         }
-        state = State.INGAME;
-        return "Called Join with id " + params[0] + " and color " + color + "\n  " + help();
+        try {
+            JoinRequest req = new JoinRequest(color, Integer.parseInt(params[0]));
+            server.joinGame(req, authToken);
+            state = State.INGAME;
+            return success("Join", "joined game " + req.gameID() + " as " + req.playerColor() + "\n  " + help());
+        } catch (ResponseException ex) {
+            return failure("Join", ex.getMessage());
+        }
     }
 
     private String observe(String[] params) {

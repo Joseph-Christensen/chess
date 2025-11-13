@@ -1,7 +1,6 @@
 package server;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import exception.ResponseException;
 import model.*;
 
@@ -10,7 +9,6 @@ import java.net.http.*;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse.BodyHandlers;
-import java.lang.reflect.Type;
 import java.util.HashSet;
 
 public class ServerFacade {
@@ -53,6 +51,27 @@ public class ServerFacade {
         var response = sendRequest(request);
         GameListResponse games = handleResponse(response, GameListResponse.class);
         return (games != null) ? games.getGames() : null;
+    }
+
+    public void joinGame(JoinRequest joinRequest, String authToken) throws ResponseException {
+        int idInput = joinRequest.gameID();
+        String color = joinRequest.playerColor();
+        HashSet<GameRepresentation> games = listGames(authToken);
+        int counter = 0;
+        int id = 0;
+        for (GameRepresentation game : games) {
+            counter++;
+            if (counter == idInput) {
+                id = counter;
+            }
+        }
+        if (id == 0) {
+            throw new ResponseException(ResponseException.Code.BadRequest, "Invalid game ID");
+        }
+        JoinRequest newReq = new JoinRequest(color, id);
+        var request = buildRequest("PUT", "/game", newReq, authToken);
+        var response = sendRequest(request);
+        handleResponse(response, null);
     }
 
     private HttpRequest buildRequest(String method, String path, Object body, Object auth) {
