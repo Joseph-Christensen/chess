@@ -143,14 +143,17 @@ public class ChessClient {
     }
 
     private String login(String[] params) {
-        if (state != State.SIGNEDOUT) {
-            return invalidCommand();
+        if (state != State.SIGNEDOUT) return invalidCommand();
+        if (params.length != 2) return "Please enter a username and password.";
+        try {
+            LoginInfo info = new LoginInfo(params[0], params[1]);
+            AuthData auth = server.login(info);
+            authToken = auth.authToken();
+            state = State.SIGNEDIN;
+            return success("Login", "Logged in as " + auth.username()) + "\n  " + help();
+        } catch (ResponseException ex) {
+            return failure("Login", ex);
         }
-        if (params.length != 2) {
-            return "Please enter a username and password.";
-        }
-        state = State.SIGNEDIN;
-        return "Logged In\n  " + help();
     }
 
     private String create(String[] params) {

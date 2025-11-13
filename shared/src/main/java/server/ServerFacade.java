@@ -27,6 +27,11 @@ public class ServerFacade {
         return handleResponse(response, AuthData.class);
     }
 
+    public AuthData login(LoginInfo loginInfo) throws ResponseException {
+        var request = buildRequest("POST", "/session", loginInfo, null);
+        var response = sendRequest(request);
+        return handleResponse(response, AuthData.class);
+    }
 
 
     private HttpRequest buildRequest(String method, String path, Object body, Object o) {
@@ -70,7 +75,7 @@ public class ServerFacade {
         switch (status) {
             case 400 -> message = "Bad request — please check your input.";
             case 401 -> message = "Unauthorized — please log in again.";
-            case 403 -> message = "Forbidden — that name or slot is already taken.";
+            case 403 -> message = "That name or slot is already taken.";
             case 404 -> message = "Not found.";
             case 500 -> message = "Server error — please try again later.";
             default -> message = "Unexpected error (" + status + ").";
