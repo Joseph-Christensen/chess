@@ -5,7 +5,6 @@ import model.*;
 import server.ServerFacade;
 
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
