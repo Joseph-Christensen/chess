@@ -115,6 +115,9 @@ public class ChessClient {
     }
 
     private String register(String[] params) {
+        if (state != State.SIGNEDOUT) {
+            return "Please enter a valid command.\n  Type 'help' to view possible commands.";
+        }
         if (params.length != 3) {
             return "Please enter a username, password, and email.";
         }
@@ -123,6 +126,9 @@ public class ChessClient {
     }
 
     private String login(String[] params) {
+        if (state != State.SIGNEDOUT) {
+            return "Please enter a valid command.\n  Type 'help' to view possible commands.";
+        }
         if (params.length != 2) {
             return "Please enter a username and password.";
         }
@@ -131,6 +137,9 @@ public class ChessClient {
     }
 
     private String create(String[] params) {
+        if (state != State.SIGNEDIN) {
+            return "Please enter a valid command.\n  Type 'help' to view possible commands.";
+        }
         if (params.length != 1) {
             return "Please enter a name for the game.";
         }
@@ -138,10 +147,16 @@ public class ChessClient {
     }
 
     private String list() {
+        if (state != State.SIGNEDIN) {
+            return "Please enter a valid command.\n  Type 'help' to view possible commands.";
+        }
         return "Called List";
     }
 
     private String join(String[] params) {
+        if (state != State.SIGNEDIN) {
+            return "Please enter a valid command.\n  Type 'help' to view possible commands.";
+        }
         if (params.length != 2) {
             return "Please enter a game id and color to join.";
         }
@@ -161,6 +176,9 @@ public class ChessClient {
     }
 
     private String observe(String[] params) {
+        if (state != State.SIGNEDIN) {
+            return "Please enter a valid command.\n  Type 'help' to view possible commands.";
+        }
         if (params.length != 1) {
             return "Please enter a game id.";
         }
@@ -172,11 +190,17 @@ public class ChessClient {
     }
 
     private String logout() {
+        if (state != State.SIGNEDIN) {
+            return "Please enter a valid command.\n  Type 'help' to view possible commands.";
+        }
         state = State.SIGNEDOUT;
         return "Logged Out\n  " + help();
     }
 
     private String leave() {
+        if (state != State.INGAME) {
+            return "Please enter a valid command.\n  Type 'help' to view possible commands.";
+        }
         state = State.SIGNEDIN;
         return "Left Game\n  " + help();
     }
