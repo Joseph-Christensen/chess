@@ -52,6 +52,7 @@ public class ChessClient {
                 case "join" -> join(params);
                 case "observe" -> observe(params);
                 case "logout" -> logout();
+                case "leave" -> leave();
                 default -> "Please enter a valid command.\n  Type 'help' to view possible commands.";
             };
         } catch (Exception ex) {
@@ -92,7 +93,13 @@ public class ChessClient {
                     SET_TEXT_COLOR_WHITE + "lists possible commands";
         }
         else {
-            return "IN GAME";
+            return
+                    SET_TEXT_COLOR_BLUE + "leave - " +
+                    SET_TEXT_COLOR_WHITE + "leaves the game\n" +
+                    SET_TEXT_COLOR_BLUE + "  quit - " +
+                    SET_TEXT_COLOR_WHITE + "exits the chess client\n" +
+                    SET_TEXT_COLOR_BLUE + "  help - " +
+                    SET_TEXT_COLOR_WHITE + "lists possible commands";
         }
 
     }
@@ -138,18 +145,39 @@ public class ChessClient {
         if (params.length != 2) {
             return "Please enter a game id and color to join.";
         }
-        return "Called Join";
+        if (!params[0].matches("\\d+")) {
+            return "Please enter a valid game id: \"" + params[0] + "\"";
+        }
+        String color;
+        if (params[1].toLowerCase().matches("black")) {
+            color = "BLACK";
+        } else if (params[1].toLowerCase().matches("white")) {
+            color = "WHITE";
+        } else {
+            return "Please enter a valid color to join: \"BLACK\" or \"WHITE\"";
+        }
+        state = State.INGAME;
+        return "Called Join with id" + params[0] + " and color " + color + "\n  " + help();
     }
 
     private String observe(String[] params) {
         if (params.length != 1) {
             return "Please enter a game id.";
         }
-        return "Called Observe";
+        if (!params[0].matches("\\d+")) {
+            return "Please enter a valid game id: \"" + params[0] + "\"";
+        }
+        state = State.INGAME;
+        return "Called Observe\n  " + help();
     }
 
     private String logout() {
         state = State.SIGNEDOUT;
         return "Logged Out\n  " + help();
+    }
+
+    private String leave() {
+        state = State.SIGNEDIN;
+        return "Left Game\n  " + help();
     }
 }
