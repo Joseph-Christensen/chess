@@ -81,11 +81,27 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void logoutNegative() throws Exception {
-        UserData user = new UserData("joe", "secrets", "j@j.com");
-        facade.register(user);
+    public void logoutNegative() {
         assertThrows(ResponseException.class, () ->
                 facade.logout("xyz")
+        );
+    }
+
+    @Test
+    public void createGamePositive() throws Exception {
+        UserData user = new UserData("joe", "secrets", "j@j.com");
+        AuthData auth = facade.register(user);
+
+        GameEntry entry = new GameEntry("myGame");
+        assertDoesNotThrow(() -> facade.createGame(entry, auth.authToken()));
+    }
+
+    @Test
+    public void createGameNegative() {
+        GameEntry entry = new GameEntry("myGame");
+
+        assertThrows(ResponseException.class, () ->
+                facade.createGame(entry, "xyz")
         );
     }
 }
