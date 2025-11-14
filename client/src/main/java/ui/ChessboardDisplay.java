@@ -18,20 +18,16 @@ public class ChessboardDisplay {
 
     public static void drawWhiteBoard(PrintStream out) {
         drawHorizontalFrameWhite(out);
-        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
-        out.print(" 8 ");
-        drawRow(out, false, true, false, false);
-        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
-        out.print(" 8 ");
+        drawTopPiecesWhite(out);
+        out.print(RESET);
+        whiteBackground = true;
     }
 
     public static void drawBlackBoard(PrintStream out) {
         drawHorizontalFrameBlack(out);
-        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
-        out.print(" 8 ");
-        drawRow(out, true, false, false, false);
-        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
-        out.print(" 8 ");
+        drawTopPiecesBlack(out);
+        out.print(RESET);
+        whiteBackground = true;
     }
 
     private static void drawHorizontalFrameWhite(PrintStream out) {
@@ -52,6 +48,32 @@ public class ChessboardDisplay {
         }
         out.print(EMPTY);
         out.println(RESET);
+    }
+
+    private static void drawTopPiecesWhite(PrintStream out) {
+        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
+        out.print(" 8 ");
+        drawRow(out, false, true, false, false);
+        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
+        out.println(" 8 ");
+        out.print(" 7 ");
+        whiteBackground = false;
+        drawRow(out, false, true, true, false);
+        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
+        out.println(" 7 ");
+    }
+
+    private static void drawTopPiecesBlack(PrintStream out) {
+        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
+        out.print(" 1 ");
+        drawRow(out, true, false, false, false);
+        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
+        out.println(" 1 ");
+        out.print(" 2 ");
+        whiteBackground = false;
+        drawRow(out, true, false, true, false);
+        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
+        out.println(" 2 ");
     }
 
     private static void drawRow(PrintStream out, boolean piecesWhite, boolean playerWhite, boolean isPawn, boolean isEmpty) {
@@ -81,5 +103,6 @@ public class ChessboardDisplay {
             }
             out.print("  " + order[i] + " ");
         }
+        out.print(RESET);
     }
 }
