@@ -136,4 +136,38 @@ public class ServerFacadeTests {
                 facade.listGames("xyz")
         );
     }
+
+    @Test
+    public void joinGame() throws Exception {
+        UserData user = new UserData("joe", "secrets", "j@j.com");
+        AuthData auth = facade.register(user);
+
+        facade.createGame(new GameEntry("myGame"), auth.authToken());
+
+        JoinRequest joinReq = new JoinRequest("WHITE", 1);
+
+        assertDoesNotThrow(() ->
+                facade.joinGame(joinReq, auth.authToken())
+        );
+    }
+
+    @Test
+    public void joinGameNegative() throws Exception {
+        UserData user = new UserData("joe", "secrets", "j@j.com");
+        AuthData auth = facade.register(user);
+
+        facade.createGame(new GameEntry("myGame"), auth.authToken());
+
+        JoinRequest joinReq = new JoinRequest("WHITE", 1);
+        facade.joinGame(joinReq, auth.authToken());
+
+        UserData user2 = new UserData("john", "johning", "johnson@johnson.com");
+        AuthData auth2 = facade.register(user2);
+
+        JoinRequest joinReq2 = new JoinRequest("WHITE", 1);
+
+        assertThrows(ResponseException.class, () ->
+                facade.joinGame(joinReq2, auth2.authToken())
+        );
+    }
 }
