@@ -221,9 +221,9 @@ public class ChessClient {
             state = State.INGAME;
             var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
             if (color.equals("WHITE")) {
-                ChessboardDisplay.drawHorizontalFrameWhite(out);
+                ChessboardDisplay.drawWhiteBoard(out);
             } else {
-                ChessboardDisplay.drawHorizontalFrameBlack(out);
+                ChessboardDisplay.drawBlackBoard(out);
             }
             return success("Join", "joined game " + req.gameID() + " as " + req.playerColor() + "\n  " + help());
         } catch (ResponseException ex) {
@@ -248,7 +248,7 @@ public class ChessClient {
             server.observeGame(gameID, authToken);
             state = State.INGAME;
             var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-            ChessboardDisplay.drawHorizontalFrameWhite(out);
+            ChessboardDisplay.drawWhiteBoard(out);
             return success("Observe", "observing game " + gameID + "\n  " + help());
         } catch (ResponseException ex) {
             String message = (ex.getCode() == ResponseException.fromHttpStatusCode(400)) ?

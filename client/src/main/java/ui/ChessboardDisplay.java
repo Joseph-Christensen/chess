@@ -14,7 +14,27 @@ public class ChessboardDisplay {
 
     private static final String RESET = "\u001b[0m";
 
-    public static void drawHorizontalFrameWhite(PrintStream out) {
+    private static boolean whiteBackground = true;
+
+    public static void drawWhiteBoard(PrintStream out) {
+        drawHorizontalFrameWhite(out);
+        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
+        out.print(" 8 ");
+        drawRow(out, false, true, false, false);
+        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
+        out.print(" 8 ");
+    }
+
+    public static void drawBlackBoard(PrintStream out) {
+        drawHorizontalFrameBlack(out);
+        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
+        out.print(" 8 ");
+        drawRow(out, true, false, false, false);
+        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
+        out.print(" 8 ");
+    }
+
+    private static void drawHorizontalFrameWhite(PrintStream out) {
         out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
         out.print(EMPTY);
         for (char c = 'a'; c <= 'h'; c++) {
@@ -24,7 +44,7 @@ public class ChessboardDisplay {
         out.println(RESET);
     }
 
-    public static void drawHorizontalFrameBlack(PrintStream out) {
+    private static void drawHorizontalFrameBlack(PrintStream out) {
         out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
         out.print(EMPTY);
         for (char c = 'h'; c >= 'a'; c--) {
@@ -32,5 +52,34 @@ public class ChessboardDisplay {
         }
         out.print(EMPTY);
         out.println(RESET);
+    }
+
+    private static void drawRow(PrintStream out, boolean piecesWhite, boolean playerWhite, boolean isPawn, boolean isEmpty) {
+        if (piecesWhite) {
+            out.print(SET_TEXT_COLOR_RED);
+        } else {
+            out.print(SET_TEXT_COLOR_BLUE);
+        }
+        String[] order;
+        if (isEmpty) {
+            order = new String[] {" ", " ", " ", " ", " ", " ", " ", " "};
+        } else if (isPawn) {
+            order = new String[] {"P", "P", "P", "P", "P", "P", "P", "P"};
+        } else if (playerWhite) {
+            order = new String[] {"R", "N", "B", "Q", "K", "B", "N", "R"};
+        } else {
+            order = new String[] {"R", "N", "B", "K", "Q", "B", "N", "R"};
+        }
+
+        for (int i = 0; i < SIZE; i++) {
+            if (whiteBackground) {
+                out.print(SET_BG_COLOR_WHITE);
+                whiteBackground = false;
+            } else {
+                out.print(SET_BG_COLOR_BLACK);
+                whiteBackground = true;
+            }
+            out.print("  " + order[i] + " ");
+        }
     }
 }
