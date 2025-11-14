@@ -4,6 +4,8 @@ import exception.ResponseException;
 import model.*;
 import server.ServerFacade;
 
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static ui.EscapeSequences.*;
@@ -217,6 +219,12 @@ public class ChessClient {
             JoinRequest req = new JoinRequest(color, gameID);
             server.joinGame(req, authToken);
             state = State.INGAME;
+            var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+            if (color.equals("WHITE")) {
+                ChessboardDisplay.drawHorizontalFrameWhite(out);
+            } else {
+                ChessboardDisplay.drawHorizontalFrameBlack(out);
+            }
             return success("Join", "joined game " + req.gameID() + " as " + req.playerColor() + "\n  " + help());
         } catch (ResponseException ex) {
             String message;
@@ -239,6 +247,8 @@ public class ChessClient {
         try {
             server.observeGame(gameID, authToken);
             state = State.INGAME;
+            var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+            ChessboardDisplay.drawHorizontalFrameWhite(out);
             return success("Observe", "observing game " + gameID + "\n  " + help());
         } catch (ResponseException ex) {
             String message = (ex.getCode() == ResponseException.fromHttpStatusCode(400)) ?
