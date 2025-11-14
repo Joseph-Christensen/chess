@@ -24,6 +24,12 @@ public class ServerFacade {
 
     // Put Methods Here
 
+    public void clear() throws ResponseException {
+        var request = buildRequest("DELETE", "/db", null, null);
+        var response = sendRequest(request);
+        handleResponse(response, null);
+    }
+
     public AuthData register(UserData user) throws ResponseException {
         var request = buildRequest("POST", "/user", user, null);
         var response = sendRequest(request);
