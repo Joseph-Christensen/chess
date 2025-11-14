@@ -170,4 +170,28 @@ public class ServerFacadeTests {
                 facade.joinGame(joinReq2, auth2.authToken())
         );
     }
+
+    @Test
+    public void observeGame() throws Exception {
+        UserData user = new UserData("joe", "secrets", "j@j.com");
+        AuthData auth = facade.register(user);
+
+        facade.createGame(new GameEntry("myGame"), auth.authToken());
+
+        assertDoesNotThrow(() ->
+                facade.observeGame(1, auth.authToken())
+        );
+    }
+
+    @Test
+    public void observeGameNegative() throws Exception {
+        UserData user = new UserData("joe", "secrets", "j@j.com");
+        AuthData auth = facade.register(user);
+
+        facade.createGame(new GameEntry("myGame"), auth.authToken());
+
+        assertThrows(ResponseException.class, () ->
+                facade.observeGame(999, auth.authToken())
+        );
+    }
 }
