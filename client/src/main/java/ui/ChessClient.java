@@ -40,8 +40,8 @@ public class ChessClient {
 
     private String eval(String input) {
         try {
-            String[] tokens = input.toLowerCase().trim().split("\\s+");
-            String flag = tokens[0];
+            String[] tokens = input.trim().split("\\s+");
+            String flag = tokens[0].toLowerCase();
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (flag) {
                 case "help" -> help();
@@ -237,8 +237,8 @@ public class ChessClient {
         if (!params[0].matches("\\d+")) return "Please enter a number for your game id.";
         int gameID = Integer.parseInt(params[0]);
         try {
-            state = State.INGAME;
             server.observeGame(gameID, authToken);
+            state = State.INGAME;
             return success("Observe", "observing game " + gameID + "\n  " + help());
         } catch (ResponseException ex) {
             String message = (ex.getCode() == ResponseException.fromHttpStatusCode(400)) ?
