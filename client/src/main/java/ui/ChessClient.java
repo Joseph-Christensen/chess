@@ -130,8 +130,8 @@ public class ChessClient {
     }
 
     private String register(String[] params) {
-        if (state != State.SIGNEDOUT) return invalidCommand();
-        if (params.length != 3) return "Please enter a username, password, and email.";
+        if (state != State.SIGNEDOUT) {return invalidCommand();}
+        if (params.length != 3) {return "Please enter a username, password, and email.";}
         try {
             var user = new UserData(params[0], params[1], params[2]);
             AuthData auth = server.register(user);
@@ -147,8 +147,8 @@ public class ChessClient {
     }
 
     private String login(String[] params) {
-        if (state != State.SIGNEDOUT) return invalidCommand();
-        if (params.length != 2) return "Please enter a username and password.";
+        if (state != State.SIGNEDOUT) {return invalidCommand();}
+        if (params.length != 2) {return "Please enter a username and password.";}
         try {
             LoginInfo info = new LoginInfo(params[0], params[1]);
             AuthData auth = server.login(info);
@@ -164,8 +164,8 @@ public class ChessClient {
     }
 
     private String create(String[] params) {
-        if (state != State.SIGNEDIN) return invalidCommand();
-        if (params.length != 1) return "Please enter a name for the game.";
+        if (state != State.SIGNEDIN) {return invalidCommand();}
+        if (params.length != 1) {return "Please enter a name for the game.";}
         try {
             GameEntry game = new GameEntry(params[0]);
             server.createGame(game, authToken);
@@ -176,7 +176,7 @@ public class ChessClient {
     }
 
     private String list() {
-        if (state != State.SIGNEDIN) return invalidCommand();
+        if (state != State.SIGNEDIN) {return invalidCommand();}
         try {
             HashSet<GameRepresentation> gamesSet = server.listGames(authToken);
             if (gamesSet == null || gamesSet.isEmpty()) {
@@ -203,9 +203,9 @@ public class ChessClient {
     }
 
     private String join(String[] params) {
-        if (state != State.SIGNEDIN) return invalidCommand();
-        if (params.length != 2) return "Please enter a game id and color to join.";
-        if (!params[0].matches("\\d+")) return "Please enter a number for your game id.";
+        if (state != State.SIGNEDIN) {return invalidCommand();}
+        if (params.length != 2) {return "Please enter a game id and color to join.";}
+        if (!params[0].matches("\\d+")) {return "Please enter a number for your game id.";}
         String color;
         if (params[1].toLowerCase().matches("black")) {
             color = "BLACK";
@@ -240,9 +240,9 @@ public class ChessClient {
     }
 
     private String observe(String[] params) {
-        if (state != State.SIGNEDIN) return invalidCommand();
-        if (params.length != 1) return "Please enter a game id.";
-        if (!params[0].matches("\\d+")) return "Please enter a number for your game id.";
+        if (state != State.SIGNEDIN) {return invalidCommand();}
+        if (params.length != 1) {return "Please enter a game id.";}
+        if (!params[0].matches("\\d+")) {return "Please enter a number for your game id.";}
         int gameID = Integer.parseInt(params[0]);
         try {
             server.observeGame(gameID, authToken);
@@ -258,7 +258,7 @@ public class ChessClient {
     }
 
     private String logout() {
-        if (state != State.SIGNEDIN) return invalidCommand();
+        if (state != State.SIGNEDIN) {return invalidCommand();}
         try {
             server.logout(authToken);
             username = null;
@@ -271,9 +271,7 @@ public class ChessClient {
     }
 
     private String leave() {
-        if (state != State.INGAME) {
-            return invalidCommand();
-        }
+        if (state != State.INGAME) {return invalidCommand();}
         state = State.SIGNEDIN;
         return "Left Game\n  " + help();
     }
