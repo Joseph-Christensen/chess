@@ -6,6 +6,8 @@ import org.junit.jupiter.api.*;
 import server.Server;
 import server.ServerFacade;
 
+import java.util.HashSet;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -30,6 +32,18 @@ public class ServerFacadeTests {
     @BeforeEach
     public void clearServer() throws Exception {
         facade.clear();
+    }
+
+    @Test
+    public void clear() throws Exception {
+        UserData user = new UserData("joe", "secrets", "j@j.com");
+        facade.register(user);
+
+        facade.clear();
+
+        assertThrows(ResponseException.class, () ->
+                facade.login(new LoginInfo(user.username(), user.password()))
+        );
     }
 
     @Test
@@ -102,6 +116,24 @@ public class ServerFacadeTests {
 
         assertThrows(ResponseException.class, () ->
                 facade.createGame(entry, "xyz")
+        );
+    }
+
+    @Test
+    public void listGames() throws Exception {
+        UserData user = new UserData("joe", "secrets", "j@j.com");
+        AuthData auth = facade.register(user);
+
+        facade.createGame(new GameEntry("myGame"), auth.authToken());
+        HashSet<GameRepresentation> games = facade.listGames(auth.authToken());
+
+        assertFalse(games.isEmpty());
+    }
+
+    @Test
+    public void listGamesNegative() {
+        assertThrows(ResponseException.class, () ->
+                facade.listGames("xyz")
         );
     }
 }
