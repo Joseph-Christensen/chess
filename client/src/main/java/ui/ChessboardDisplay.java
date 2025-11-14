@@ -20,6 +20,8 @@ public class ChessboardDisplay {
         drawHorizontalFrameWhite(out);
         drawTopPiecesWhite(out);
         drawEmptyRows(out, true);
+        drawBottomPiecesWhite(out);
+        drawHorizontalFrameWhite(out);
         out.print(RESET);
         whiteBackground = true;
     }
@@ -28,6 +30,8 @@ public class ChessboardDisplay {
         drawHorizontalFrameBlack(out);
         drawTopPiecesBlack(out);
         drawEmptyRows(out, false);
+        drawBottomPiecesBlack(out);
+        drawHorizontalFrameBlack(out);
         out.print(RESET);
         whiteBackground = true;
     }
@@ -106,6 +110,39 @@ public class ChessboardDisplay {
                 out.println(RESET);
             }
         }
+        whiteBackground = true;
+    }
+
+    private static void drawBottomPiecesWhite(PrintStream out) {
+        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
+        out.print(" 2 ");
+        drawRow(out, true, true, true, false);
+        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
+        out.print(" 2 ");
+        out.println(RESET);
+        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
+        out.print(" 1 ");
+        whiteBackground = false;
+        drawRow(out, true, true, false, false);
+        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
+        out.print(" 1 ");
+        out.println(RESET);
+    }
+
+    private static void drawBottomPiecesBlack(PrintStream out) {
+        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
+        out.print(" 7 ");
+        drawRow(out, false, false, true, false);
+        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
+        out.print(" 7 ");
+        out.println(RESET);
+        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
+        out.print(" 8 ");
+        whiteBackground = false;
+        drawRow(out, false, false, false, false);
+        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
+        out.print(" 8 ");
+        out.println(RESET);
     }
 
     private static void drawRow(PrintStream out, boolean piecesWhite, boolean playerWhite, boolean isPawn, boolean isEmpty) {
