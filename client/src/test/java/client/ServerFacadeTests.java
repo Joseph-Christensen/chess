@@ -48,4 +48,27 @@ public class ServerFacadeTests {
                 facade.register(user)
         );
     }
+
+    @Test
+    public void login() throws Exception {
+        UserData user = new UserData("joe", "secrets", "j@j.com");
+        facade.register(user);
+
+        LoginInfo login = new LoginInfo("joe", "secrets");
+        AuthData auth = facade.login(login);
+
+        assertEquals("joe", auth.username());
+    }
+
+    @ Test
+    public void loginNegative() throws Exception {
+        UserData user = new UserData("joe", "secrets", "j@j.com");
+        facade.register(user);
+
+        LoginInfo login = new LoginInfo("joe", "openbook");
+
+        assertThrows(ResponseException.class, () ->
+                facade.login(login)
+        );
+    }
 }
