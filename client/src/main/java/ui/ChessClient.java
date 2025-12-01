@@ -2,7 +2,10 @@ package ui;
 
 import exception.ResponseException;
 import model.*;
+import server.NotificationHandler;
 import server.ServerFacade;
+import server.WebSocketFacade;
+import websocket.messages.NotificationMessage;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -10,15 +13,17 @@ import java.util.*;
 
 import static ui.EscapeSequences.*;
 
-public class ChessClient {
+public class ChessClient implements NotificationHandler {
 
     private State state = State.SIGNEDOUT;
     private final ServerFacade server;
+    private final WebSocketFacade ws;
     private String authToken = null;
     private String username = null;
 
-    public ChessClient (String serverURL) {
+    public ChessClient (String serverURL) throws ResponseException {
         server = new ServerFacade(serverURL);
+        ws = new WebSocketFacade(serverURL, this);
     }
 
     public void repl() {
@@ -65,6 +70,11 @@ public class ChessClient {
         } catch (Exception ex) {
             return ex.getMessage();
         }
+    }
+
+    public void notify(NotificationMessage notification) {
+        System.out.println(SET_TEXT_COLOR_MAGENTA + notification.getMessage());
+        printPrompt();
     }
 
     private void printPrompt() {
