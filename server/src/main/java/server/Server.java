@@ -10,6 +10,7 @@ import model.*;
 import service.ChessException;
 import service.GameService;
 import service.UserService;
+import websocket.WebSocketHandler;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -19,6 +20,7 @@ public class Server {
     private final Javalin server;
     private final UserService userService;
     private final GameService gameService;
+    private final WebSocketHandler webSocketHandler;
 
     public Server() {
         DataAccess dataAccess = null;
@@ -33,6 +35,8 @@ public class Server {
         userService = new UserService(dataAccess);
         gameService = new GameService(dataAccess);
 
+        this.webSocketHandler = new WebSocketHandler(dataAccess);
+
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
         server.delete("db", this::clear);
@@ -42,6 +46,11 @@ public class Server {
         server.get("game", this::listGames);
         server.post("game", this::createGame);
         server.put("game", this::joinGame);
+        server.ws("ws", ws -> {
+            ws.onConnect(webSocketHandler);
+            ws.onMessage(webSocketHandler);
+            ws.onClose(webSocketHandler);
+        });
     }
 
     private void clear(Context ctx) {
