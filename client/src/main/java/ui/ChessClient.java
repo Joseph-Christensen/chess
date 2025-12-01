@@ -55,8 +55,8 @@ public class ChessClient {
                 case "join" -> join(params);
                 case "observe" -> observe(params);
                 case "logout" -> logout();
-                case "make move" -> makeMove(params);
-                case "highlight moves" -> highlight(params);
+                case "move" -> makeMove(params);
+                case "highlight" -> highlight(params);
                 case "redraw" -> redraw();
                 case "resign" -> resign();
                 case "leave" -> leave();
@@ -101,9 +101,9 @@ public class ChessClient {
         }
         else {
             return
-                    SET_TEXT_COLOR_BLUE + "make move <STARTSPACE> <ENDSPACE> - " +
+                    SET_TEXT_COLOR_BLUE + "move <STARTSPACE> <ENDSPACE> - " +
                     SET_TEXT_COLOR_WHITE + "makes a move\n" +
-                    SET_TEXT_COLOR_BLUE + "  highlight moves <STARTSPACE> - " +
+                    SET_TEXT_COLOR_BLUE + "  highlight <STARTSPACE> - " +
                     SET_TEXT_COLOR_WHITE + "highlights legal moves for a given starting space\n" +
                     SET_TEXT_COLOR_BLUE + "  redraw - " +
                     SET_TEXT_COLOR_WHITE + "redraws the board\n" +
