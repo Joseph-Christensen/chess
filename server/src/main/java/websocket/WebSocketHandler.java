@@ -37,7 +37,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     @Override
     public void handleMessage(WsMessageContext ctx) {
-        int gameID = -1;
+        int gameID;
         Session session = ctx.session;
 
         try {
