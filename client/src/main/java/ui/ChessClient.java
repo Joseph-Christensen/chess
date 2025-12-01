@@ -55,6 +55,10 @@ public class ChessClient {
                 case "join" -> join(params);
                 case "observe" -> observe(params);
                 case "logout" -> logout();
+                case "make move" -> makeMove(params);
+                case "highlight moves" -> highlight(params);
+                case "redraw" -> redraw();
+                case "resign" -> resign();
                 case "leave" -> leave();
                 default -> invalidCommand();
             };
@@ -97,7 +101,15 @@ public class ChessClient {
         }
         else {
             return
-                    SET_TEXT_COLOR_BLUE + "leave - " +
+                    SET_TEXT_COLOR_BLUE + "make move <STARTSPACE> <ENDSPACE> - " +
+                    SET_TEXT_COLOR_WHITE + "makes a move\n" +
+                    SET_TEXT_COLOR_BLUE + "  highlight moves <STARTSPACE> - " +
+                    SET_TEXT_COLOR_WHITE + "highlights legal moves for a given starting space\n" +
+                    SET_TEXT_COLOR_BLUE + "  redraw - " +
+                    SET_TEXT_COLOR_WHITE + "redraws the board\n" +
+                    SET_TEXT_COLOR_BLUE + "  resign - " +
+                    SET_TEXT_COLOR_WHITE + "concedes the game\n" +
+                    SET_TEXT_COLOR_BLUE + "  leave - " +
                     SET_TEXT_COLOR_WHITE + "leaves the game\n" +
                     SET_TEXT_COLOR_BLUE + "  quit - " +
                     SET_TEXT_COLOR_WHITE + "exits the chess client\n" +
@@ -268,6 +280,30 @@ public class ChessClient {
         } catch (ResponseException ex) {
             return failure("Logout", ex.getMessage());
         }
+    }
+
+    private String makeMove(String[] params) {
+        if (state != State.INGAME) {return invalidCommand();}
+        if (params.length != 2) {return "Please enter a start and end board space.";}
+        // something checking valid move syntax
+        return params[0];
+    }
+
+    private String highlight(String[] params) {
+        if (state != State.INGAME) {return invalidCommand();}
+        if (params.length != 1) {return "Please enter a board space.";}
+        // something checking valid move syntax
+        return params[0];
+    }
+
+    private String redraw() {
+        if (state != State.INGAME) {return invalidCommand();}
+        return "Redrawing!";
+    }
+
+    private String resign() {
+        if (state != State.INGAME) {return invalidCommand();}
+        return "Resigning :(";
     }
 
     private String leave() {
