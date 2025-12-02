@@ -62,25 +62,7 @@ public class ServerFacade {
     }
 
     public void joinGame(JoinRequest joinRequest, String authToken) throws ResponseException {
-        int idInput = joinRequest.gameID();
-        String color = joinRequest.playerColor();
-
-        HashSet<GameRepresentation> gamesSet = listGames(authToken);
-        if (gamesSet == null || gamesSet.isEmpty()) {
-            throw new ResponseException(ResponseException.Code.BadRequest, "No games available");
-        }
-
-        List<GameRepresentation> games = new ArrayList<>(gamesSet);
-
-        if (idInput < 1 || idInput > games.size()) {
-            throw new ResponseException(ResponseException.Code.BadRequest, "Invalid game ID");
-        }
-
-        int gameID = games.get(idInput - 1).gameID();
-
-        JoinRequest newReq = new JoinRequest(color, gameID);
-
-        var request = buildRequest("PUT", "/game", newReq, authToken);
+        var request = buildRequest("PUT", "/game", joinRequest, authToken);
         var response = sendRequest(request);
         handleResponse(response, null);
     }

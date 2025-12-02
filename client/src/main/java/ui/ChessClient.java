@@ -238,7 +238,8 @@ public class ChessClient implements NotificationHandler {
         }
         int gameID = Integer.parseInt(params[0]);
         try {
-            JoinRequest req = new JoinRequest(color, gameID);
+            HashSet<GameRepresentation> gamesSet = server.listGames(authToken);
+            JoinRequest req = getJoinRequest(gamesSet, gameID, color);
             server.joinGame(req, authToken);
             state = State.INGAME;
             var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
@@ -247,7 +248,7 @@ public class ChessClient implements NotificationHandler {
             } else {
                 ChessboardDisplay.drawBlackBoard(out);
             }
-            return success("Join", "joined game " + req.gameID() + " as " + req.playerColor() + "\n  " + help());
+            return success("Join", "joined game " + gameID + " as " + req.playerColor() + "\n  " + help());
         } catch (ResponseException ex) {
             String message;
             if (ex.getCode() == ResponseException.fromHttpStatusCode(403)) {
@@ -259,6 +260,22 @@ public class ChessClient implements NotificationHandler {
             }
             return failure("Join", message);
         }
+    }
+
+    private static JoinRequest getJoinRequest(HashSet<GameRepresentation> gamesSet, int inputID, String color) throws ResponseException {
+        if (gamesSet == null || gamesSet.isEmpty()) {
+            throw new ResponseException(ResponseException.Code.BadRequest, "No games available");
+        }
+
+        List<GameRepresentation> games = new ArrayList<>(gamesSet);
+
+        if (inputID < 1 || inputID > games.size()) {
+            throw new ResponseException(ResponseException.Code.BadRequest, "Invalid game ID");
+        }
+
+        int gameID = games.get(inputID - 1).gameID();
+
+        return new JoinRequest(color, gameID);
     }
 
     private String observe(String[] params) {

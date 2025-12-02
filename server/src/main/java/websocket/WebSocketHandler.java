@@ -69,6 +69,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             int gameID = command.getGameID();
             String authToken = command.getAuthToken();
             AuthData auth = dataAccess.getAuth(authToken);
+            if (auth == null) {
+                connections.sendSelf(session, new ErrorMessage("Error: Unauthorized"));
+                return;
+            }
             String username = auth.username();
             GameData game = dataAccess.getGame(gameID);
 
