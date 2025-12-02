@@ -108,6 +108,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String authToken = command.getAuthToken();
             ChessMove move = command.getMove();
 
+            // check assumptions
             AuthData auth = dataAccess.getAuth(authToken);
             if (auth == null) {
                 connections.sendSelf(session, new ErrorMessage("Error: Unauthorized"));
@@ -133,6 +134,22 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 connections.sendSelf(session, new ErrorMessage("Error: Not your turn."));
                 return;
             }
+
+            // make the move
+            try {
+                game.makeMove(move);
+            } catch (InvalidMoveException ex) {
+                connections.sendSelf(session, new ErrorMessage("Error: " + ex.getMessage()));
+                return;
+            }
+
+            GameData updatedGameData = new GameData(
+                    gameData.gameID(),
+                    gameData.whiteUsername(),
+                    gameData.blackUsername(),
+                    gameData.gameName(),
+                    game
+            );
         } catch (DataAccessException ex) {
             connections.sendSelf(session, new ErrorMessage(ex.getMessage()));
         }
