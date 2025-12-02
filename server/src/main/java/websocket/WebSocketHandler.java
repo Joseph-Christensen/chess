@@ -124,6 +124,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
             if (!username.equals(gameData.whiteUsername()) && !username.equals(gameData.blackUsername())) {
                 connections.sendSelf(session, new ErrorMessage("Error: Observers can't play."));
+                return;
             }
 
             ChessGame game = serializer.fromJson(String.valueOf(gameData.game()), ChessGame.class);
@@ -163,6 +164,18 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String moveMsg = String.format("%s moved from %s to %s.", username, start, end);
             connections.broadcast(gameID, session, new ServerMessage(NOTIFICATION, moveMsg));
 
+            // check for checkmate, check, stalemate
+            ChessGame.TeamColor opponent = (turn == WHITE) ? BLACK : WHITE;
+            if (game.isInCheckmate(opponent)) {
+                connections.broadcast(gameID, null,
+                        new ServerMessage(NOTIFICATION, opponent + " is in checkmate!"));
+            } else if (game.isInCheck(opponent)) {
+                connections.broadcast(gameID, null,
+                        new ServerMessage(NOTIFICATION, opponent + " is in check!"));
+            } else if (game.isInStalemate(opponent)) {
+                connections.broadcast(gameID, null,
+                        new ServerMessage(NOTIFICATION, opponent + " is in stalemate!"));
+            }
         } catch (DataAccessException ex) {
             connections.sendSelf(session, new ErrorMessage(ex.getMessage()));
         }
