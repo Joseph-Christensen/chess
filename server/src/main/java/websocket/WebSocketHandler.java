@@ -70,9 +70,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String authToken = command.getAuthToken();
             AuthData auth = dataAccess.getAuth(authToken);
             String username = auth.username();
+            GameData game = dataAccess.getGame(gameID);
+
+            if (game == null) {
+                connections.sendSelf(session, new ErrorMessage("Error: game not found."));
+                return;
+            }
 
             connections.add(gameID, session);
-            GameData game = dataAccess.getGame(gameID);
             String color;
             if (username.equals(game.whiteUsername())) {
                 color = "white";
@@ -87,7 +92,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             var serverMessage = new ServerMessage(NOTIFICATION, message);
             connections.broadcast(gameID, session, serverMessage);
         } catch (DataAccessException ex) {
-            connections.sendSelf(session, new ServerMessage(ERROR, ex.getMessage()));
+            connections.sendSelf(session, new ErrorMessage(ex.getMessage()));
         }
     }
 
