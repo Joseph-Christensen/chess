@@ -28,12 +28,26 @@ public class ConnectionManager {
     public void broadcast(int gameID, Session excludeSession, NotificationMessage notification) throws IOException {
         Set<Session> recipients = connections.get(gameID);
         if (recipients == null) return;
-
         String msg = notification.getMessage();
+
         for (Session s : recipients) {
-            if (s.isOpen() && !s.equals(excludeSession)) {
-                s.getRemote().sendString(msg);
+            if (excludeSession == null) {
+                if (s.isOpen()) {
+                    s.getRemote().sendString(msg);
+                }
             }
+            else {
+                if (s.isOpen() && !s.equals(excludeSession)) {
+                    s.getRemote().sendString(msg);
+                }
+            }
+        }
+    }
+
+    public void sendSelf(Session session, NotificationMessage notification) throws IOException {
+        String msg = notification.getMessage();
+        if (session.isOpen()) {
+            session.getRemote().sendString(msg);
         }
     }
 }

@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+@ClientEndpoint
 public class WebSocketFacade extends Endpoint {
 
     Session session;
@@ -29,7 +30,7 @@ public class WebSocketFacade extends Endpoint {
 
             //set message handler
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
-                @Override
+                @OnMessage
                 public void onMessage(String message) {
                     NotificationMessage notification = new Gson().fromJson(message, NotificationMessage.class);
                     notificationHandler.notify(notification);
@@ -39,4 +40,5 @@ public class WebSocketFacade extends Endpoint {
             throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
         }
     }
+
 }
