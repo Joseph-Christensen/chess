@@ -150,6 +150,19 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     gameData.gameName(),
                     game
             );
+
+            dataAccess.updateGame(updatedGameData);
+
+            // broadcast the new game to all
+            connections.broadcast(gameID, null, new LoadGameMessage(game.toString()));
+
+            // notify what move was made
+            String start = getPositionString(move.getStartPosition());
+            String end = getPositionString(move.getEndPosition());
+
+            String moveMsg = String.format("%s moved from %s to %s.", username, start, end);
+            connections.broadcast(gameID, session, new ServerMessage(NOTIFICATION, moveMsg));
+
         } catch (DataAccessException ex) {
             connections.sendSelf(session, new ErrorMessage(ex.getMessage()));
         }
@@ -161,5 +174,22 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var serverMessage = new ServerMessage(NOTIFICATION, message);
         connections.broadcast(gameID, session, serverMessage);
         connections.remove(gameID, session);
+    }
+
+    private String getPositionString(ChessPosition pos) {
+        int row = pos.getRow();
+        int col = pos.getColumn();
+
+        switch (col) {
+            case 1 -> {return "a" + row;}
+            case 2 -> {return "b" + row;}
+            case 3 -> {return "c" + row;}
+            case 4 -> {return "d" + row;}
+            case 5 -> {return "e" + row;}
+            case 6 -> {return "f" + row;}
+            case 7 -> {return "g" + row;}
+            case 8 -> {return "h" + row;}
+        }
+        return "Invalid";
     }
 }
