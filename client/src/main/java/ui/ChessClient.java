@@ -5,7 +5,7 @@ import model.*;
 import server.NotificationHandler;
 import server.ServerFacade;
 import server.WebSocketFacade;
-import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -72,7 +72,7 @@ public class ChessClient implements NotificationHandler {
         }
     }
 
-    public void notify(NotificationMessage notification) {
+    public void notify(ServerMessage notification) {
         System.out.println(SET_TEXT_COLOR_MAGENTA + notification.getMessage());
         printPrompt();
     }

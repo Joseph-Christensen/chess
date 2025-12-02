@@ -1,5 +1,6 @@
 package websocket;
 
+import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.messages.*;
 
@@ -9,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
     public final ConcurrentHashMap<Integer, Set<Session>> connections = new ConcurrentHashMap<>();
+    Gson gson = new Gson();
 
     public void add(int gameID, Session session) {
         Set<Session> set = connections.computeIfAbsent(gameID, k -> ConcurrentHashMap.newKeySet());
@@ -25,10 +27,11 @@ public class ConnectionManager {
         }
     }
 
-    public void broadcast(int gameID, Session excludeSession, NotificationMessage notification) throws IOException {
+    public void broadcast(int gameID, Session excludeSession, ServerMessage serverMessage) throws IOException {
         Set<Session> recipients = connections.get(gameID);
         if (recipients == null) return;
-        String msg = notification.getMessage();
+
+        String msg = gson.toJson(serverMessage);
 
         for (Session s : recipients) {
             if (excludeSession == null) {
@@ -44,8 +47,8 @@ public class ConnectionManager {
         }
     }
 
-    public void sendSelf(Session session, NotificationMessage notification) throws IOException {
-        String msg = notification.getMessage();
+    public void sendSelf(Session session, ServerMessage serverMessage) throws IOException {
+        String msg = gson.toJson(serverMessage);
         if (session.isOpen()) {
             session.getRemote().sendString(msg);
         }

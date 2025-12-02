@@ -65,15 +65,15 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         int gameID = command.getGameID();
         connections.add(gameID, session);
         var message = String.format("%s has joined the game", username);
-        var notification = new NotificationMessage(NOTIFICATION, message);
-        connections.broadcast(gameID, session, notification);
+        var serverMessage = new ServerMessage(NOTIFICATION, message);
+        connections.broadcast(gameID, session, serverMessage);
     }
 
     private void leave(Session session, String username, UserGameCommand command) throws IOException {
         int gameID = command.getGameID();
         var message = String.format("%s left the game", username);
-        var notification = new NotificationMessage(NOTIFICATION, message);
-        connections.broadcast(gameID, session, notification);
+        var serverMessage = new ServerMessage(NOTIFICATION, message);
+        connections.broadcast(gameID, session, serverMessage);
         connections.remove(gameID, session);
     }
 }
