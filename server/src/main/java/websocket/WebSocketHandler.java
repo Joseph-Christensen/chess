@@ -1,6 +1,6 @@
 package websocket;
 
-import chess.ChessGame;
+import chess.*;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
@@ -50,7 +50,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             connections.add(gameID, session);
             switch (command.getCommandType()) {
                 case CONNECT -> connect(session, command);
-                case MAKE_MOVE -> System.out.print("move");
+                case MAKE_MOVE -> move(session, serializer.fromJson(ctx.message(), MakeMoveCommand.class));
                 case LEAVE -> System.out.print("leave");
                 case RESIGN -> System.out.print("resign");
             }
@@ -95,6 +95,30 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             var message = String.format("%s has joined the game as %s.", username, color);
             var serverMessage = new ServerMessage(NOTIFICATION, message);
             connections.broadcast(gameID, session, serverMessage);
+        } catch (DataAccessException ex) {
+            connections.sendSelf(session, new ErrorMessage(ex.getMessage()));
+        }
+    }
+
+    private void move(Session session, MakeMoveCommand command) throws IOException {
+        try {
+            int gameID = command.getGameID();
+            String authToken = command.getAuthToken();
+            ChessMove move = command.getMove();
+
+            AuthData auth = dataAccess.getAuth(authToken);
+            if (auth == null) {
+                connections.sendSelf(session, new ErrorMessage("Error: Unauthorized"));
+                return;
+            }
+            String username = auth.username();
+
+            GameData gameData = dataAccess.getGame(gameID);
+            if (gameData == null) {
+                connections.sendSelf(session, new ErrorMessage("Error: Game not found."));
+                return;
+            }
+
         } catch (DataAccessException ex) {
             connections.sendSelf(session, new ErrorMessage(ex.getMessage()));
         }
