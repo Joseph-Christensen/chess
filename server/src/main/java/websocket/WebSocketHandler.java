@@ -1,5 +1,6 @@
 package websocket;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
@@ -10,6 +11,8 @@ import io.javalin.websocket.WsConnectContext;
 import io.javalin.websocket.WsConnectHandler;
 import io.javalin.websocket.WsMessageContext;
 import io.javalin.websocket.WsMessageHandler;
+import model.AuthData;
+import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
 import websocket.messages.*;
@@ -18,6 +21,7 @@ import static websocket.commands.UserGameCommand.CommandType.*;
 import static websocket.messages.ServerMessage.ServerMessageType.*;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
@@ -43,15 +47,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         try {
             UserGameCommand command = serializer.fromJson(ctx.message(), UserGameCommand.class);
             gameID = command.getGameID();
-            String username = dataAccess.getUsername(command.getAuthToken());
             connections.add(gameID, session);
             switch (command.getCommandType()) {
-                case CONNECT -> connect(session, username, command);
+                case CONNECT -> connect(session, command);
                 case MAKE_MOVE -> System.out.print("move");
                 case LEAVE -> System.out.print("leave");
                 case RESIGN -> System.out.print("resign");
             }
-        } catch (DataAccessException | IOException ex) {
+        } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
     }
@@ -61,12 +64,31 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         System.out.println("Websocket closed");
     }
 
-    private void connect(Session session, String username, UserGameCommand command) throws IOException {
-        int gameID = command.getGameID();
-        connections.add(gameID, session);
-        var message = String.format("%s has joined the game", username);
-        var serverMessage = new ServerMessage(NOTIFICATION, message);
-        connections.broadcast(gameID, session, serverMessage);
+    private void connect(Session session, UserGameCommand command) throws IOException {
+        try {
+            int gameID = command.getGameID();
+            String authToken = command.getAuthToken();
+            AuthData auth = dataAccess.getAuth(authToken);
+            String username = auth.username();
+
+            connections.add(gameID, session);
+            GameData game = dataAccess.getGame(gameID);
+            String color;
+            if (username.equals(game.whiteUsername())) {
+                color = "white";
+            } else if (username.equals(game.blackUsername())) {
+                color = "black";
+            } else {
+                color = "an observer";
+            }
+            connections.sendSelf(session, new LoadGameMessage(game.toString()));
+
+            var message = String.format("%s has joined the game as %s.", username, color);
+            var serverMessage = new ServerMessage(NOTIFICATION, message);
+            connections.broadcast(gameID, session, serverMessage);
+        } catch (DataAccessException ex) {
+            connections.sendSelf(session, new ServerMessage(ERROR, ex.getMessage()));
+        }
     }
 
     private void leave(Session session, String username, UserGameCommand command) throws IOException {
