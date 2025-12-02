@@ -86,25 +86,13 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public void updateGame(String username, boolean isWhite, int id) {
-        GameData selectedGame = getGame(id);
-        if (isWhite) {
-            games.put(id, new GameData(
-                    selectedGame.gameID(),
-                    username,
-                    selectedGame.blackUsername(),
-                    selectedGame.gameName(),
-                    selectedGame.game()
-            ));
-        }
-        else {
-            games.put(id, new GameData(
-                    selectedGame.gameID(),
-                    selectedGame.whiteUsername(),
-                    username,
-                    selectedGame.gameName(),
-                    selectedGame.game()
-            ));
-        }
+    public void updateGame(GameData game) {
+        games.put(game.gameID(), new GameData(
+                game.gameID(),
+                game.whiteUsername(),
+                game.blackUsername(),
+                game.gameName(),
+                game.game()
+        ));
     }
 }

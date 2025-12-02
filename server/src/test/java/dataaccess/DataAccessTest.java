@@ -201,7 +201,8 @@ class DataAccessTest {
     void updateGame() throws DataAccessException {
         GameData game = db.createGame("game1");
         UserData user = new UserData("joe", "manysecrets", "j@j.com");
-        db.updateGame(user.username(), true, game.gameID());
+        GameData newGame = new GameData(game.gameID(), user.username(), game.blackUsername(), game.gameName(), game.game());
+        db.updateGame(newGame);
         GameData found = db.getGame(game.gameID());
         assertEquals(user.username(), found.whiteUsername());
     }
@@ -211,7 +212,8 @@ class DataAccessTest {
         GameData game = db.createGame("game1");
         UserData user = new UserData("joe", "manysecrets", "j@j.com");
 
-        assertDoesNotThrow(() -> db.updateGame(user.username(), true, 2));
+        GameData newGame = new GameData(2, user.username(), game.blackUsername(), game.gameName(), game.game());
+        assertDoesNotThrow(() -> db.updateGame(newGame));
         assertNull(db.getGame(game.gameID()).whiteUsername());
     }
 }

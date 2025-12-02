@@ -17,5 +17,5 @@ public interface DataAccess {
     GameData createGame(String gameName) throws DataAccessException;
     GameData getGame(int id) throws DataAccessException;
     HashMap<Integer, GameData> allGames() throws DataAccessException;
-    void updateGame(String username, boolean isWhite, int id) throws DataAccessException;
+    void updateGame(GameData game) throws DataAccessException;
 }

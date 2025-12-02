@@ -59,29 +59,38 @@ public class GameService {
             if (notAuthorized(authToken)) {
                 throw new ChessException(401, "unauthorized");
             }
-            if (!Objects.equals(joinRequest.playerColor(), "WHITE")) {
-                if (!Objects.equals(joinRequest.playerColor(), "BLACK")) {
+            String color = joinRequest.playerColor();
+            int gameID = joinRequest.gameID();
+            if (!Objects.equals(color, "WHITE")) {
+                if (!Objects.equals(color, "BLACK")) {
                     throw new ChessException(400, "bad request");
                 }
             }
-            if (dataAccess.getGame(joinRequest.gameID()) == null) {
+            GameData game = dataAccess.getGame(gameID);
+            if (game == null) {
                 throw new ChessException(400, "bad request");
             }
             boolean isWhite;
-            if (joinRequest.playerColor().equals("WHITE")) {
-                if (dataAccess.getGame(joinRequest.gameID()).whiteUsername() != null) {
+            if (color.equals("WHITE")) {
+                if (game.whiteUsername() != null) {
                     throw new ChessException(403, "already taken");
                 }
                 isWhite = true;
             }
             else {
-                if (dataAccess.getGame(joinRequest.gameID()).blackUsername() != null) {
+                if (game.blackUsername() != null) {
                     throw new ChessException(403, "already taken");
                 }
                 isWhite = false;
             }
             String username = dataAccess.getUsername(authToken);
-            dataAccess.updateGame(username, isWhite, joinRequest.gameID());
+            GameData newData;
+            if (isWhite) {
+                newData = new GameData(gameID, username, game.blackUsername(), game.gameName(), game.game());
+            } else {
+                newData = new GameData(gameID, game.whiteUsername(), username, game.gameName(), game.game());
+            }
+            dataAccess.updateGame(newData);
         } catch (DataAccessException ex) {
             throw new ChessException(500, ex.getMessage());
         }

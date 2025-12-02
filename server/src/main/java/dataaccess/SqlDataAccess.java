@@ -249,16 +249,19 @@ public class SqlDataAccess implements DataAccess {
     }
 
     @Override
-    public void updateGame(String username, boolean isWhite, int id) throws DataAccessException {
+    public void updateGame(GameData game) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            String column = isWhite ? "whiteUsername" : "blackUsername";
-            String statement = "UPDATE gameData SET " + column + " = ? WHERE gameID = ?";
+            String statement = "UPDATE gameData SET whiteUsername = ?, blackUsername = ?, game = ? WHERE gameID = ?";
+
             try (var ps = conn.prepareStatement(statement)) {
-                ps.setString(1, username);
-                ps.setInt(2, id);
+                ps.setString(1, game.whiteUsername());
+                ps.setString(2, game.blackUsername());
+                ps.setString(3, game.game().toString());
+                ps.setInt(4, game.gameID());
+
                 ps.executeUpdate();
             }
-        } catch (SQLException | DataAccessException ex) {
+        } catch (SQLException ex) {
             throw new DataAccessException("Error updating game: " + ex.getMessage(), ex);
         }
     }
