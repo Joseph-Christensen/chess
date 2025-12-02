@@ -17,6 +17,8 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
 import websocket.messages.*;
 import websocket.commands.*;
+
+import static chess.ChessGame.TeamColor.*;
 import static websocket.commands.UserGameCommand.CommandType.*;
 import static websocket.messages.ServerMessage.ServerMessageType.*;
 
@@ -119,6 +121,18 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 return;
             }
 
+            if (!username.equals(gameData.whiteUsername()) && !username.equals(gameData.blackUsername())) {
+                connections.sendSelf(session, new ErrorMessage("Error: Observers can't play."));
+            }
+
+            ChessGame game = serializer.fromJson(String.valueOf(gameData.game()), ChessGame.class);
+
+            ChessGame.TeamColor turn = game.getTeamTurn();
+            if ((turn == WHITE && !username.equals(gameData.whiteUsername())) ||
+                    (turn == BLACK && !username.equals(gameData.blackUsername()))) {
+                connections.sendSelf(session, new ErrorMessage("Error: Not your turn."));
+                return;
+            }
         } catch (DataAccessException ex) {
             connections.sendSelf(session, new ErrorMessage(ex.getMessage()));
         }
