@@ -282,7 +282,7 @@ public class ChessGame {
         this.gameOver = true;
     }
 
-    public TeamColor getResignedPlayer() {
+    private TeamColor getResignedPlayer() {
         return resignedPlayer;
     }
 

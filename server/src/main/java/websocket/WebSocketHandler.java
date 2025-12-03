@@ -126,6 +126,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
             ChessGame game = serializer.fromJson(String.valueOf(gameData.game()), ChessGame.class);
 
+            if (game.isOver()) {
+                connections.sendSelf(session, new ErrorMessage("Error: " + game.getGameOverReason()));
+                return;
+            }
+
             ChessGame.TeamColor turn = game.getTeamTurn();
             if ((turn == WHITE && !username.equals(gameData.whiteUsername())) ||
                     (turn == BLACK && !username.equals(gameData.blackUsername()))) {
@@ -149,8 +154,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     game
             );
 
-            dataAccess.updateGame(updatedGameData);
-
             // broadcast the new game to all
             connections.broadcast(gameID, null, new LoadGameMessage(game.toString()));
 
@@ -164,15 +167,19 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             // check for checkmate, check, stalemate
             ChessGame.TeamColor opponent = (turn == WHITE) ? BLACK : WHITE;
             if (game.isInCheckmate(opponent)) {
+                game.endGame();
                 connections.broadcast(gameID, null,
                         new ServerMessage(NOTIFICATION, opponent + " is in checkmate!"));
             } else if (game.isInCheck(opponent)) {
                 connections.broadcast(gameID, null,
                         new ServerMessage(NOTIFICATION, opponent + " is in check!"));
             } else if (game.isInStalemate(opponent)) {
+                game.endGame();
                 connections.broadcast(gameID, null,
                         new ServerMessage(NOTIFICATION, opponent + " is in stalemate!"));
             }
+
+            dataAccess.updateGame(updatedGameData);
         } catch (DataAccessException ex) {
             connections.sendSelf(session, new ErrorMessage(ex.getMessage()));
         }
@@ -192,8 +199,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String username = auth.username();
 
             // load game
-            GameData game = dataAccess.getGame(gameID);
-            if (game == null) {
+            GameData gameData = dataAccess.getGame(gameID);
+            if (gameData == null) {
                 connections.sendSelf(session, new ErrorMessage("Error: Game not found"));
                 return;
             }
@@ -202,22 +209,22 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             boolean changed = false;
             GameData updatedGame = null;
 
-            if (username.equals(game.whiteUsername())) {
+            if (username.equals(gameData.whiteUsername())) {
                 updatedGame = new GameData(
-                        game.gameID(),
+                        gameData.gameID(),
                         null,
-                        game.blackUsername(),
-                        game.gameName(),
-                        game.game()
+                        gameData.blackUsername(),
+                        gameData.gameName(),
+                        gameData.game()
                 );
                 changed = true;
-            } else if (username.equals(game.blackUsername())) {
+            } else if (username.equals(gameData.blackUsername())) {
                 updatedGame = new GameData(
-                        game.gameID(),
-                        game.whiteUsername(),
+                        gameData.gameID(),
+                        gameData.whiteUsername(),
                         null,
-                        game.gameName(),
-                        game.game()
+                        gameData.gameName(),
+                        gameData.game()
                 );
                 changed = true;
             }
@@ -237,8 +244,37 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void resign(Session session, UserGameCommand command) throws IOException {
-        try {
+        int gameID = command.getGameID();
+        String authToken = command.getAuthToken();
 
+        try {
+            // authenticate
+            AuthData auth = dataAccess.getAuth(authToken);
+            if (auth == null) {
+                connections.sendSelf(session, new ErrorMessage("Error: Unauthorized"));
+                return;
+            }
+            String username = auth.username();
+
+            // load game
+            GameData gameData = dataAccess.getGame(gameID);
+            if (gameData == null) {
+                connections.sendSelf(session, new ErrorMessage("Error: Game not found"));
+                return;
+            }
+
+            // check if player
+            if (!username.equals(gameData.whiteUsername()) && !username.equals(gameData.blackUsername())) {
+                connections.sendSelf(session, new ErrorMessage("Error: Observers can't resign."));
+                return;
+            }
+
+            ChessGame game = gameData.game();
+
+            if (game.isOver()) {
+                connections.sendSelf(session, new ErrorMessage("Error: " + game.getGameOverReason()));
+                return;
+            }
         } catch (DataAccessException ex) {
             connections.sendSelf(session, new ErrorMessage(ex.getMessage()));
         }
