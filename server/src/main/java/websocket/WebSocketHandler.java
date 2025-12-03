@@ -198,6 +198,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 connections.sendSelf(session, new ErrorMessage("Error: Game not found"));
                 return;
             }
+
+
         } catch (DataAccessException ex) {
             connections.sendSelf(session, new ErrorMessage(ex.getMessage()));
         }
