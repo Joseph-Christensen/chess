@@ -4,7 +4,6 @@ import chess.*;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
-import exception.ResponseException;
 import io.javalin.websocket.WsCloseContext;
 import io.javalin.websocket.WsCloseHandler;
 import io.javalin.websocket.WsConnectContext;
@@ -19,11 +18,9 @@ import websocket.messages.*;
 import websocket.commands.*;
 
 import static chess.ChessGame.TeamColor.*;
-import static websocket.commands.UserGameCommand.CommandType.*;
 import static websocket.messages.ServerMessage.ServerMessageType.*;
 
 import java.io.IOException;
-import java.util.Objects;
 
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
 
@@ -229,8 +226,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 dataAccess.updateGame(updatedGame);
             }
 
+            String message = username + " has left the game.";
+            connections.broadcast(gameID, session,
+                    new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message));
 
-
+            connections.remove(gameID, session);
         } catch (DataAccessException ex) {
             connections.sendSelf(session, new ErrorMessage(ex.getMessage()));
         }
