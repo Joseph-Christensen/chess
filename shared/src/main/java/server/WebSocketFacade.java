@@ -1,5 +1,6 @@
 package server;
 
+import chess.ChessMove;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import jakarta.websocket.ContainerProvider;
@@ -63,7 +64,18 @@ public class WebSocketFacade {
         session.getBasicRemote().sendText(gson.toJson(command));
     }
 
-    public void makeMove() {
+    public void makeMove(int gameID, String authToken, ChessMove move) throws IOException {
+        MakeMoveCommand command = new MakeMoveCommand(authToken, gameID, move);
+        session.getBasicRemote().sendText(gson.toJson(command));
+    }
 
+    public void leave(int gameID, String authToken) throws IOException {
+        UserGameCommand command = new UserGameCommand(LEAVE, authToken, gameID);
+        session.getBasicRemote().sendText(gson.toJson(command));
+    }
+
+    public void resign(int gameID, String authToken) throws IOException {
+        UserGameCommand command = new UserGameCommand(RESIGN, authToken, gameID);
+        session.getBasicRemote().sendText(gson.toJson(command));
     }
 }
