@@ -16,6 +16,8 @@ public class ChessGame {
     private TeamColor teamTurn;
     private ChessPosition whiteKing;
     private ChessPosition blackKing;
+    private boolean gameOver = false;
+    private TeamColor resignedPlayer;
 
     public ChessGame() {
         myBoard = new ChessBoard();
@@ -270,6 +272,40 @@ public class ChessGame {
     public ChessBoard getBoard() {
         return myBoard;
     }
+
+    public void endGame() {
+        this.gameOver = true;
+    }
+
+    public void resign(TeamColor resignedPlayer) {
+        this.resignedPlayer = resignedPlayer;
+        this.gameOver = true;
+    }
+
+    public TeamColor getResignedPlayer() {
+        return resignedPlayer;
+    }
+
+    public boolean isOver() {
+        return gameOver;
+    }
+
+    public String getGameOverReason () {
+        if (isInCheckmate(TeamColor.WHITE)) {
+            return "White is already in checkmate.";
+        } else if (isInCheckmate(TeamColor.BLACK)) {
+            return "Black is already in checkmate.";
+        } else if (isInStalemate(TeamColor.WHITE)) {
+            return "White is already in stalemate.";
+        } else if (isInStalemate(TeamColor.BLACK)) {
+            return "Black is already in stalemate.";
+        } else if (TeamColor.WHITE.equals(getResignedPlayer())) {
+            return "White already resigned.";
+        } else {
+            return "Black already resigned.";
+        }
+    }
+
 
     @Override
     public boolean equals(Object o) {

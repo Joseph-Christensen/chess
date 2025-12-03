@@ -236,6 +236,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
+    private void resign(Session session, UserGameCommand command) throws IOException {
+        try {
+
+        } catch (DataAccessException ex) {
+            connections.sendSelf(session, new ErrorMessage(ex.getMessage()));
+        }
+    }
+
     private String getPositionString(ChessPosition pos) {
         int row = pos.getRow();
         int col = pos.getColumn();
