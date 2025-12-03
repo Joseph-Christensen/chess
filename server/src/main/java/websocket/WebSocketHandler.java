@@ -53,7 +53,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             switch (command.getCommandType()) {
                 case CONNECT -> connect(session, command);
                 case MAKE_MOVE -> move(session, serializer.fromJson(ctx.message(), MakeMoveCommand.class));
-                case LEAVE -> System.out.print("leave");
+                case LEAVE -> leave(session, command);
                 case RESIGN -> System.out.print("resign");
             }
         } catch (IOException ex) {
@@ -186,6 +186,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         String authToken = command.getAuthToken();
 
         try {
+            // authenticate
             AuthData auth = dataAccess.getAuth(authToken);
             if (auth == null) {
                 connections.sendSelf(session, new ErrorMessage("Error: Unauthorized"));
@@ -193,11 +194,41 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             }
             String username = auth.username();
 
+            // load game
             GameData game = dataAccess.getGame(gameID);
             if (game == null) {
                 connections.sendSelf(session, new ErrorMessage("Error: Game not found"));
                 return;
             }
+
+            // change the game data if not observer
+            boolean changed = false;
+            GameData updatedGame = null;
+
+            if (username.equals(game.whiteUsername())) {
+                updatedGame = new GameData(
+                        game.gameID(),
+                        null,
+                        game.blackUsername(),
+                        game.gameName(),
+                        game.game()
+                );
+                changed = true;
+            } else if (username.equals(game.blackUsername())) {
+                updatedGame = new GameData(
+                        game.gameID(),
+                        game.whiteUsername(),
+                        null,
+                        game.gameName(),
+                        game.game()
+                );
+                changed = true;
+            }
+
+            if (changed) {
+                dataAccess.updateGame(updatedGame);
+            }
+
 
 
         } catch (DataAccessException ex) {
