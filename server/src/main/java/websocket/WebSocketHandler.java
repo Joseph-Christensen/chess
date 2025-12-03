@@ -51,7 +51,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 case CONNECT -> connect(session, command);
                 case MAKE_MOVE -> move(session, serializer.fromJson(ctx.message(), MakeMoveCommand.class));
                 case LEAVE -> leave(session, command);
-                case RESIGN -> System.out.print("resign");
+                case RESIGN -> resign(session, command);
             }
         } catch (IOException ex) {
             throw new RuntimeException(ex);
@@ -263,8 +263,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 return;
             }
 
+            boolean isWhite = username.equals(gameData.whiteUsername());
+            boolean isBlack = username.equals(gameData.blackUsername());
+
             // check if player
-            if (!username.equals(gameData.whiteUsername()) && !username.equals(gameData.blackUsername())) {
+            if (!isWhite && !isBlack) {
                 connections.sendSelf(session, new ErrorMessage("Error: Observers can't resign."));
                 return;
             }
@@ -275,6 +278,16 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 connections.sendSelf(session, new ErrorMessage("Error: " + game.getGameOverReason()));
                 return;
             }
+
+            ChessGame.TeamColor color = isWhite ? WHITE : BLACK;
+
+            game.resign(color);
+
+            dataAccess.updateGame(gameData);
+
+            ServerMessage msg = new ServerMessage(NOTIFICATION, username + " resigned.");
+
+            connections.broadcast(gameID, null, msg);
         } catch (DataAccessException ex) {
             connections.sendSelf(session, new ErrorMessage(ex.getMessage()));
         }
