@@ -181,12 +181,26 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private void leave(Session session, String username, UserGameCommand command) throws IOException {
+    private void leave(Session session, UserGameCommand command) throws IOException {
         int gameID = command.getGameID();
-        var message = String.format("%s left the game", username);
-        var serverMessage = new ServerMessage(NOTIFICATION, message);
-        connections.broadcast(gameID, session, serverMessage);
-        connections.remove(gameID, session);
+        String authToken = command.getAuthToken();
+
+        try {
+            AuthData auth = dataAccess.getAuth(authToken);
+            if (auth == null) {
+                connections.sendSelf(session, new ErrorMessage("Error: Unauthorized"));
+                return;
+            }
+            String username = auth.username();
+
+            GameData game = dataAccess.getGame(gameID);
+            if (game == null) {
+                connections.sendSelf(session, new ErrorMessage("Error: Game not found"));
+                return;
+            }
+        } catch (DataAccessException ex) {
+            connections.sendSelf(session, new ErrorMessage(ex.getMessage()));
+        }
     }
 
     private String getPositionString(ChessPosition pos) {
