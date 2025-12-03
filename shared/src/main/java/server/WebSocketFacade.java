@@ -15,6 +15,8 @@ import java.net.URISyntaxException;
 
 import jakarta.websocket.ClientEndpoint;
 
+import static websocket.commands.UserGameCommand.CommandType.*;
+
 @ClientEndpoint
 public class WebSocketFacade {
 
@@ -31,33 +33,37 @@ public class WebSocketFacade {
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketURI);
 
+            this.session.addMessageHandler(new MessageHandler.Whole<String>() {
+                @OnMessage
+                public void onMessage(String message) {
+                    ServerMessage base = gson.fromJson(message, ServerMessage.class);
 
+                    switch (base.getServerMessageType()) {
+                        case LOAD_GAME -> {
+                            LoadGameMessage loadGame = gson.fromJson(message, LoadGameMessage.class);
+                            notificationHandler.notify(loadGame);
+                        }
+                        case ERROR -> {
+                            ErrorMessage error = gson.fromJson(message, ErrorMessage.class);
+                            notificationHandler.notify(error);
+                        }
+                        case NOTIFICATION -> {
+                            notificationHandler.notify(base);
+                        }
+                    }
+                }
+            });
         } catch (DeploymentException | IOException | URISyntaxException ex) {
             throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
         }
+    }
 
-        //set message handler
-        this.session.addMessageHandler(new MessageHandler.Whole<String>() {
-            @OnMessage
-            public void onMessage(String message) {
-                ServerMessage base = gson.fromJson(message, ServerMessage.class);
+    public void connect(int gameID, String authToken) throws IOException {
+        UserGameCommand command = new UserGameCommand(CONNECT, authToken, gameID);
+        session.getBasicRemote().sendText(gson.toJson(command));
+    }
 
-                switch (base.getServerMessageType()) {
-                    case LOAD_GAME -> {
-                        LoadGameMessage loadGame = gson.fromJson(message, LoadGameMessage.class);
-                        notificationHandler.notify(loadGame);
-                    }
-                    case ERROR -> {
-                        ErrorMessage error = gson.fromJson(message, ErrorMessage.class);
-                        notificationHandler.notify(error);
-                    }
-                    case NOTIFICATION -> {
-                        notificationHandler.notify(base);
-                    }
-                }
-            }
-        });
-
+    public void makeMove() {
 
     }
 }
