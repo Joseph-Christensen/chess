@@ -335,13 +335,12 @@ public class ChessClient implements NotificationHandler {
             if (currentGame.isOver()) {
                 return currentGame.getGameOverReason();
             }
-
             if (currentGame.getTeamTurn() != team) {
                 return "It isn't your turn.";
             }
+
             String startPos = params[0].toLowerCase();
             String endPos = params[1].toLowerCase();
-
             ChessPosition start = translatePosition(startPos);
             ChessPosition end = translatePosition(endPos);
 
@@ -363,18 +362,14 @@ public class ChessClient implements NotificationHandler {
                             (pieceColor == ChessGame.TeamColor.BLACK && end.getRow() == 1);
 
             if (isPawn && reachesEnd) {
-
                 ChessPiece.PieceType promotionPiece = getPromotion();
-
                 move = new ChessMove(start, end, promotionPiece);
-
             } else {
                 // Normal move
                 move = new ChessMove(start, end, null);
             }
 
             ws.makeMove(currentGameID, authToken, move);
-
             return "You moved from " + startPos + " to " + endPos  + ".";
         } catch (ResponseException | IOException ex) {
             return failure("Move", ex.getMessage());
