@@ -375,7 +375,7 @@ public class ChessClient implements NotificationHandler {
 
             ws.makeMove(currentGameID, authToken, move);
 
-            return "";
+            return "You moved from " + startPos + " to " + endPos  + ".";
         } catch (ResponseException | IOException ex) {
             return failure("Move", ex.getMessage());
         }
@@ -422,7 +422,12 @@ public class ChessClient implements NotificationHandler {
 
     private String resign() {
         if (state != State.INGAME) { return invalidCommand(); }
+        if (team == null) {return "You are an observer.";}
         try {
+            if (currentGame.isOver()) {
+                return currentGame.getGameOverReason();
+            }
+            currentGame.resign(team);
             ws.resign(currentGameID, authToken);
             return success("Resign", "You resigned.");
         } catch (IOException ex) {
