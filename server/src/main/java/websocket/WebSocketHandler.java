@@ -243,7 +243,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
         try {
             UserGameData data = authLoad(session, gameID, authToken);
-            if (data == null) return;
+            if (data == null) {return;}
 
             String username = data.username();
             GameData gameData = data.gameData();

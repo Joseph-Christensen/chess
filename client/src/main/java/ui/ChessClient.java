@@ -439,7 +439,6 @@ public class ChessClient implements NotificationHandler {
             currentGame = new ChessGame();
             currentGameID = -1;
             return success("Leave", "You left the Game\n  " + help());
-
         } catch (IOException ex) {
             return failure("Leave", ex.getMessage());
         }
@@ -483,9 +482,7 @@ public class ChessClient implements NotificationHandler {
     private ChessPiece.PieceType getPromotion() {
         System.out.print(SET_TEXT_COLOR_MAGENTA + "\n  What piece do you want to promote to? (Q|R|B|N): " + SET_TEXT_COLOR_GREEN);
         String choice = scanner.nextLine().trim().toUpperCase();
-
         ChessPiece.PieceType promotionPiece = null;
-
         while (promotionPiece == null) {
             switch (choice) {
                 case "Q" -> promotionPiece = ChessPiece.PieceType.QUEEN;
@@ -498,7 +495,6 @@ public class ChessClient implements NotificationHandler {
                 }
             }
         }
-
         return promotionPiece;
     }
 }
