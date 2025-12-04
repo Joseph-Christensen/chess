@@ -190,22 +190,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         String authToken = command.getAuthToken();
 
         try {
-            // authenticate
-            AuthData auth = dataAccess.getAuth(authToken);
-            if (auth == null) {
-                connections.sendSelf(session, new ErrorMessage("Error: Unauthorized"));
-                return;
-            }
-            String username = auth.username();
 
-            // load game
-            GameData gameData = dataAccess.getGame(gameID);
-            if (gameData == null) {
-                connections.sendSelf(session, new ErrorMessage("Error: Game not found"));
-                return;
-            }
+            UserGameData data = authLoad(session, gameID, authToken);
+            if (data == null) {return;}
 
-            // change the game data if not observer
+            String username = data.username();
+            GameData gameData = data.gameData();
+
             boolean changed = false;
             GameData updatedGame = null;
 
@@ -248,20 +239,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         String authToken = command.getAuthToken();
 
         try {
-            // authenticate
-            AuthData auth = dataAccess.getAuth(authToken);
-            if (auth == null) {
-                connections.sendSelf(session, new ErrorMessage("Error: Unauthorized"));
-                return;
-            }
-            String username = auth.username();
+            UserGameData data = authLoad(session, gameID, authToken);
+            if (data == null) return;
 
-            // load game
-            GameData gameData = dataAccess.getGame(gameID);
-            if (gameData == null) {
-                connections.sendSelf(session, new ErrorMessage("Error: Game not found"));
-                return;
-            }
+            String username = data.username();
+            GameData gameData = data.gameData();
 
             boolean isWhite = username.equals(gameData.whiteUsername());
             boolean isBlack = username.equals(gameData.blackUsername());
@@ -310,7 +292,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         return "Invalid";
     }
 
-    private UserGameContext authLoad(Session session, int gameID, String authToken) throws IOException {
+    private UserGameData authLoad(Session session, int gameID, String authToken) throws IOException {
         try {
             // authenticate
             AuthData auth = dataAccess.getAuth(authToken);
@@ -326,12 +308,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 return null;
             }
 
-            return new UserGameContext(auth.username(), gameData);
+            return new UserGameData(auth.username(), gameData);
         } catch (DataAccessException ex) {
             connections.sendSelf(session, new ErrorMessage(ex.getMessage()));
             return null;
         }
     }
 
-    private record UserGameContext(String username, GameData gameData) {}
+    private record UserGameData(String username, GameData gameData) {}
 }
