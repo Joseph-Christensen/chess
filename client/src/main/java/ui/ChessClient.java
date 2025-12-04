@@ -333,6 +333,9 @@ public class ChessClient implements NotificationHandler {
         if (params.length != 2) {return "Please enter a start and end board space.";}
         // something checking valid move syntax
         try {
+            if (currentGame.getTeamTurn() != team) {
+                return "It isn't your turn.";
+            }
             String startPos = params[0].toLowerCase();
             String endPos = params[1].toLowerCase();
 
@@ -411,8 +414,17 @@ public class ChessClient implements NotificationHandler {
 
     private String leave() {
         if (state != State.INGAME) {return invalidCommand();}
-        state = State.SIGNEDIN;
-        return "Left Game\n  " + help();
+        try {
+            ws.leave(currentGameID, authToken);
+            state = State.SIGNEDIN;
+            team = null;
+            currentGame = new ChessGame();
+            currentGameID = -1;
+            return success("Leave", "Left the Game" + help());
+
+        } catch (IOException ex) {
+            return failure("Leave", ex.getMessage());
+        }
     }
 
     private ChessPosition translatePosition(String pos) throws ResponseException {
