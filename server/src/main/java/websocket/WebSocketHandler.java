@@ -73,23 +73,23 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 return;
             }
             String username = auth.username();
-            GameData game = dataAccess.getGame(gameID);
+            GameData gameData = dataAccess.getGame(gameID);
 
-            if (game == null) {
+            if (gameData == null) {
                 connections.sendSelf(session, new ErrorMessage("Error: game not found."));
                 return;
             }
 
             connections.add(gameID, session);
             String color;
-            if (username.equals(game.whiteUsername())) {
+            if (username.equals(gameData.whiteUsername())) {
                 color = "white";
-            } else if (username.equals(game.blackUsername())) {
+            } else if (username.equals(gameData.blackUsername())) {
                 color = "black";
             } else {
                 color = "an observer";
             }
-            connections.sendSelf(session, new LoadGameMessage(game.toString()));
+            connections.sendSelf(session, new LoadGameMessage(gameData.game().toString()));
 
             var message = String.format("%s has joined the game as %s.", username, color);
             var serverMessage = new ServerMessage(NOTIFICATION, message);

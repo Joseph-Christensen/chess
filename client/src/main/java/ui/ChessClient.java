@@ -4,6 +4,7 @@ import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import com.google.gson.Gson;
 import exception.ResponseException;
 import model.*;
 import server.NotificationHandler;
@@ -33,6 +34,7 @@ public class ChessClient implements NotificationHandler {
     private ChessGame currentGame = new ChessGame();
     private int currentGameID = -1;
     private final Scanner scanner = new Scanner(System.in);
+    private final Gson gson = new Gson();
 
     public ChessClient (String serverURL) throws ResponseException {
         server = new ServerFacade(serverURL);
@@ -95,7 +97,9 @@ public class ChessClient implements NotificationHandler {
     }
 
     public void displayGame(LoadGameMessage loadGameMessage) {
-        System.out.println(SET_TEXT_COLOR_MAGENTA + loadGameMessage.getGame());
+        ChessGame game = gson.fromJson(loadGameMessage.getGame(), ChessGame.class);
+        currentGame = game;
+        redraw(game);
         printPrompt();
     }
 
@@ -268,7 +272,6 @@ public class ChessClient implements NotificationHandler {
             server.joinGame(req, authToken);
             ws.join(req.gameID(), authToken);
             state = State.INGAME;
-            redraw(currentGame);
             return success("Join", "joined game " + gameID + " as " + req.playerColor() + "\n  " + help());
         } catch (ResponseException ex) {
             String message;
@@ -297,7 +300,6 @@ public class ChessClient implements NotificationHandler {
             server.observeGame(gameID, authToken);
             ws.join(req.gameID(), authToken);
             state = State.INGAME;
-            redraw(currentGame);
             return success("Observe", "observing game " + gameID + "\n  " + help());
         } catch (ResponseException ex) {
             String message = (ex.getCode() == ResponseException.fromHttpStatusCode(400)) ?
@@ -396,7 +398,6 @@ public class ChessClient implements NotificationHandler {
 
     private String redraw(ChessGame game) {
         if (state != State.INGAME) {return invalidCommand();}
-        currentGame = game;
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         if (team.equals(BLACK)) {
             ChessboardDisplay.drawBlackBoard(out, game.getBoard());
