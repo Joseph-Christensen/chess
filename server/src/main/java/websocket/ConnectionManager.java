@@ -29,7 +29,7 @@ public class ConnectionManager {
 
     public void broadcast(int gameID, Session excludeSession, ServerMessage serverMessage) throws IOException {
         Set<Session> recipients = connections.get(gameID);
-        if (recipients == null) return;
+        if (recipients == null) {return;}
 
         String msg = gson.toJson(serverMessage);
 

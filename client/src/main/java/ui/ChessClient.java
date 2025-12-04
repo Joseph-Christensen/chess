@@ -404,14 +404,11 @@ public class ChessClient implements NotificationHandler {
         try {
             String startPos = params[0].toLowerCase();
             ChessPosition start = translatePosition(startPos);
-
             ChessPiece piece = currentGame.getBoard().getPiece(start);
             if (piece == null) {
                 return "There is no piece on " + startPos + ".";
             }
-
             var validMoves = currentGame.validMoves(start);
-
             var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
             if (team == null) {
                 ChessboardDisplay.drawWhiteBoard(out, currentGame.getBoard(), validMoves);
@@ -420,7 +417,6 @@ public class ChessClient implements NotificationHandler {
             } else {
                 ChessboardDisplay.drawWhiteBoard(out, currentGame.getBoard(), validMoves);
             }
-
             return "";
         } catch (ResponseException ex) {
             return failure("Highlight", ex.getMessage());
@@ -470,27 +466,21 @@ public class ChessClient implements NotificationHandler {
         if (pos.length() != 2) {
             throw new ResponseException(ResponseException.Code.BadRequest, errorMessage);
         }
-
         char colChar = pos.charAt(0);
         char rowChar = pos.charAt(1);
-
         // check a-h
         if (colChar < 'a' || colChar > 'h') {
             if (colChar < 'A' || colChar > 'H') {
                 throw new ResponseException(ResponseException.Code.BadRequest, errorMessage);
             }
         }
-
         // check 1-8
         if (rowChar < '1' || rowChar > '8') {
             throw new ResponseException(ResponseException.Code.BadRequest, errorMessage);
         }
-
         colChar = Character.toLowerCase(colChar);
-
         int col = colChar - 'a' + 1;
         int row = rowChar - '1' + 1;
-
         return new ChessPosition(row, col);
     }
 
@@ -498,15 +488,11 @@ public class ChessClient implements NotificationHandler {
         if (gamesSet == null || gamesSet.isEmpty()) {
             throw new ResponseException(BadRequest, "No games available");
         }
-
         List<GameRepresentation> games = new ArrayList<>(gamesSet);
-
         if (inputID < 1 || inputID > games.size()) {
             throw new ResponseException(BadRequest, "Invalid game ID");
         }
-
         int gameID = games.get(inputID - 1).gameID();
-
         return new JoinRequest(color, gameID);
     }
 }

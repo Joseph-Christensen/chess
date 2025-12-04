@@ -309,4 +309,29 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
         return "Invalid";
     }
+
+    private UserGameContext authLoad(Session session, int gameID, String authToken) throws IOException {
+        try {
+            // authenticate
+            AuthData auth = dataAccess.getAuth(authToken);
+            if (auth == null) {
+                connections.sendSelf(session, new ErrorMessage("Error: Unauthorized"));
+                return null;
+            }
+
+            // load game
+            GameData gameData = dataAccess.getGame(gameID);
+            if (gameData == null) {
+                connections.sendSelf(session, new ErrorMessage("Error: Game not found"));
+                return null;
+            }
+
+            return new UserGameContext(auth.username(), gameData);
+        } catch (DataAccessException ex) {
+            connections.sendSelf(session, new ErrorMessage(ex.getMessage()));
+            return null;
+        }
+    }
+
+    private record UserGameContext(String username, GameData gameData) {}
 }
