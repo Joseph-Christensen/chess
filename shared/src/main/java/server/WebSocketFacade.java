@@ -5,7 +5,6 @@ import com.google.gson.Gson;
 import exception.ResponseException;
 import jakarta.websocket.ContainerProvider;
 import jakarta.websocket.WebSocketContainer;
-import org.glassfish.tyrus.core.wsadl.model.Endpoint;
 import websocket.messages.*;
 import websocket.commands.*;
 
