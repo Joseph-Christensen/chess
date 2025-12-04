@@ -291,29 +291,17 @@ public class ChessClient implements NotificationHandler {
         }
     }
 
-    private static JoinRequest getJoinRequest(HashSet<GameRepresentation> gamesSet, int inputID, String color) throws ResponseException {
-        if (gamesSet == null || gamesSet.isEmpty()) {
-            throw new ResponseException(BadRequest, "No games available");
-        }
-
-        List<GameRepresentation> games = new ArrayList<>(gamesSet);
-
-        if (inputID < 1 || inputID > games.size()) {
-            throw new ResponseException(BadRequest, "Invalid game ID");
-        }
-
-        int gameID = games.get(inputID - 1).gameID();
-
-        return new JoinRequest(color, gameID);
-    }
-
     private String observe(String[] params) {
         if (state != State.SIGNEDIN) {return invalidCommand();}
         if (params.length != 1) {return "Please enter a game id.";}
         if (!params[0].matches("\\d+")) {return "Please enter a number for your game id.";}
         int gameID = Integer.parseInt(params[0]);
         try {
+            HashSet<GameRepresentation> gamesSet = server.listGames(authToken);
+            JoinRequest req = getJoinRequest(gamesSet, gameID, null);
+            currentGameID = req.gameID();
             server.observeGame(gameID, authToken);
+            ws.join(req.gameID(), authToken);
             state = State.INGAME;
             var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
             ChessboardDisplay.drawWhiteBoard(out);
@@ -322,6 +310,8 @@ public class ChessClient implements NotificationHandler {
             String message = (ex.getCode() == ResponseException.fromHttpStatusCode(400)) ?
                     "Game id \"" + gameID + "\" doesn't exist." : ex.getMessage();
             return failure("Observe", message);
+        } catch (IOException ex) {
+            return failure("Observe", ex.getMessage());
         }
     }
 
@@ -401,6 +391,30 @@ public class ChessClient implements NotificationHandler {
         }
     }
 
+    private String highlight(String[] params) {
+        if (state != State.INGAME) {return invalidCommand();}
+        if (params.length != 1) {return "Please enter a board space.";}
+        // something checking valid move syntax
+        return params[0];
+    }
+
+    private String redraw(ChessGame game) {
+        if (state != State.INGAME) {return invalidCommand();}
+        currentGame = game;
+        return "Redrawing!";
+    }
+
+    private String resign() {
+        if (state != State.INGAME) {return invalidCommand();}
+        return "Resigning :(";
+    }
+
+    private String leave() {
+        if (state != State.INGAME) {return invalidCommand();}
+        state = State.SIGNEDIN;
+        return "Left Game\n  " + help();
+    }
+
     private ChessPosition translatePosition(String pos) throws ResponseException {
         String errorMessage = "Chess positions must be in the format <a-h><1-8>.";
         if (pos.length() != 2) {
@@ -430,27 +444,19 @@ public class ChessClient implements NotificationHandler {
         return new ChessPosition(row, col);
     }
 
-    private String highlight(String[] params) {
-        if (state != State.INGAME) {return invalidCommand();}
-        if (params.length != 1) {return "Please enter a board space.";}
-        // something checking valid move syntax
-        return params[0];
-    }
+    private JoinRequest getJoinRequest(HashSet<GameRepresentation> gamesSet, int inputID, String color) throws ResponseException {
+        if (gamesSet == null || gamesSet.isEmpty()) {
+            throw new ResponseException(BadRequest, "No games available");
+        }
 
-    private String redraw(ChessGame game) {
-        if (state != State.INGAME) {return invalidCommand();}
-        currentGame = game;
-        return "Redrawing!";
-    }
+        List<GameRepresentation> games = new ArrayList<>(gamesSet);
 
-    private String resign() {
-        if (state != State.INGAME) {return invalidCommand();}
-        return "Resigning :(";
-    }
+        if (inputID < 1 || inputID > games.size()) {
+            throw new ResponseException(BadRequest, "Invalid game ID");
+        }
 
-    private String leave() {
-        if (state != State.INGAME) {return invalidCommand();}
-        state = State.SIGNEDIN;
-        return "Left Game\n  " + help();
+        int gameID = games.get(inputID - 1).gameID();
+
+        return new JoinRequest(color, gameID);
     }
 }
