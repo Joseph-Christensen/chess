@@ -408,8 +408,13 @@ public class ChessClient implements NotificationHandler {
     }
 
     private String resign() {
-        if (state != State.INGAME) {return invalidCommand();}
-        return "Resigning :(";
+        if (state != State.INGAME) { return invalidCommand(); }
+        try {
+            ws.resign(currentGameID, authToken);
+            return success("Resign", "You resigned.");
+        } catch (IOException ex) {
+            return failure("Resign", ex.getMessage());
+        }
     }
 
     private String leave() {
