@@ -13,7 +13,7 @@ public class ConnectionManager {
     Gson gson = new Gson();
 
     public void add(int gameID, Session session) {
-        Set<Session> set = connections.computeIfAbsent(gameID, k -> ConcurrentHashMap.newKeySet());
+        Set<Session> set = connections.computeIfAbsent(gameID, _ -> ConcurrentHashMap.newKeySet());
         set.add(session);
     }
 

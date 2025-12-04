@@ -90,12 +90,12 @@ public class ChessClient implements NotificationHandler {
     }
 
     public void notify(ServerMessage notification) {
-        System.out.print("\n" +SET_TEXT_COLOR_MAGENTA + notification.getMessage());
+        System.out.print("\n  " + SET_TEXT_COLOR_MAGENTA + notification.getMessage());
         printPrompt();
     }
 
     public void error(ErrorMessage errorMessage) {
-        System.out.print("\n" + SET_TEXT_COLOR_MAGENTA + errorMessage.getErrorMessage());
+        System.out.print("\n  " + SET_TEXT_COLOR_MAGENTA + errorMessage.getErrorMessage());
         printPrompt();
     }
 
@@ -364,23 +364,7 @@ public class ChessClient implements NotificationHandler {
 
             if (isPawn && reachesEnd) {
 
-                System.out.print(SET_TEXT_COLOR_MAGENTA + "\n  What piece do you want to promote to? (Q|R|B|N): " + SET_TEXT_COLOR_GREEN);
-                String choice = scanner.nextLine().trim().toUpperCase();
-
-                ChessPiece.PieceType promotionPiece = null;
-
-                while (promotionPiece == null) {
-                    switch (choice) {
-                        case "Q" -> promotionPiece = ChessPiece.PieceType.QUEEN;
-                        case "R" -> promotionPiece = ChessPiece.PieceType.ROOK;
-                        case "B" -> promotionPiece = ChessPiece.PieceType.BISHOP;
-                        case "N" -> promotionPiece = ChessPiece.PieceType.KNIGHT;
-                        default -> {
-                            System.out.println(SET_TEXT_COLOR_MAGENTA + "\n  Invalid choice. Enter (Q|R|B|N): " + SET_TEXT_COLOR_GREEN);
-                            choice = scanner.nextLine().trim().toUpperCase();
-                        }
-                    }
-                }
+                ChessPiece.PieceType promotionPiece = getPromotion();
 
                 move = new ChessMove(start, end, promotionPiece);
 
@@ -391,7 +375,7 @@ public class ChessClient implements NotificationHandler {
 
             ws.makeMove(currentGameID, authToken, move);
 
-            return success("Move", "Moved from " + startPos + " to " + endPos + ".");
+            return "";
         } catch (ResponseException | IOException ex) {
             return failure("Move", ex.getMessage());
         }
@@ -494,5 +478,27 @@ public class ChessClient implements NotificationHandler {
         }
         int gameID = games.get(inputID - 1).gameID();
         return new JoinRequest(color, gameID);
+    }
+
+    private ChessPiece.PieceType getPromotion() {
+        System.out.print(SET_TEXT_COLOR_MAGENTA + "\n  What piece do you want to promote to? (Q|R|B|N): " + SET_TEXT_COLOR_GREEN);
+        String choice = scanner.nextLine().trim().toUpperCase();
+
+        ChessPiece.PieceType promotionPiece = null;
+
+        while (promotionPiece == null) {
+            switch (choice) {
+                case "Q" -> promotionPiece = ChessPiece.PieceType.QUEEN;
+                case "R" -> promotionPiece = ChessPiece.PieceType.ROOK;
+                case "B" -> promotionPiece = ChessPiece.PieceType.BISHOP;
+                case "N" -> promotionPiece = ChessPiece.PieceType.KNIGHT;
+                default -> {
+                    System.out.println(SET_TEXT_COLOR_MAGENTA + "\n  Invalid choice. Enter (Q|R|B|N): " + SET_TEXT_COLOR_GREEN);
+                    choice = scanner.nextLine().trim().toUpperCase();
+                }
+            }
+        }
+
+        return promotionPiece;
     }
 }

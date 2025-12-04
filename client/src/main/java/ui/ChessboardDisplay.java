@@ -38,42 +38,8 @@ public class ChessboardDisplay {
         out.print(" 8 ");
         for (int i = SIZE; i > 0; i--) {
             for (int j = 1; j < SIZE + 1; j++) {
-                ChessPosition pos = new ChessPosition(i, j);
-                ChessPiece piece = board.getPiece(pos);
 
-
-                if (piece != null) {
-                    if (piece.getTeamColor().equals(WHITE)) {
-                        out.print(SET_TEXT_COLOR_RED);
-                    } else {
-                        out.print(SET_TEXT_COLOR_BLUE);
-                    }
-                }
-
-                if (validMoves == null) {
-                    if (whiteBackground) {
-                        out.print(SET_BG_COLOR_WHITE);
-                    } else {
-                        out.print(SET_BG_COLOR_BLACK);
-                    }
-                } else {
-                    if (pos.equals(start)) {
-                        out.print(SET_BG_COLOR_YELLOW);
-                    } else if (endPositions.contains(pos) && posIsEven(pos)) {
-                        out.print(SET_BG_COLOR_DARK_GREEN);
-                    } else if (endPositions.contains(pos)) {
-                        out.print(SET_BG_COLOR_GREEN);
-                    } else if (whiteBackground) {
-                        out.print(SET_BG_COLOR_WHITE);
-                    } else {
-                        out.print(SET_BG_COLOR_BLACK);
-                    }
-                }
-
-                // get the String being printed
-                String pieceRep = getString(piece);
-
-                out.print(" " + pieceRep + " ");
+                processPosition(i, j, board, validMoves, start, endPositions, out);
 
                 if (j == 8 && i != 1) {
                     drawEdge(out, i, i - 1);
@@ -106,42 +72,8 @@ public class ChessboardDisplay {
         out.print(" 1 ");
         for (int i = 1; i < SIZE + 1; i++) {
             for (int j = SIZE; j > 0; j--) {
-                ChessPosition pos = new ChessPosition(i, j);
-                ChessPiece piece = board.getPiece(pos);
 
-
-                if (piece != null) {
-                    if (piece.getTeamColor().equals(WHITE)) {
-                        out.print(SET_TEXT_COLOR_RED);
-                    } else {
-                        out.print(SET_TEXT_COLOR_BLUE);
-                    }
-                }
-
-                if (validMoves == null) {
-                    if (whiteBackground) {
-                        out.print(SET_BG_COLOR_WHITE);
-                    } else {
-                        out.print(SET_BG_COLOR_BLACK);
-                    }
-                } else {
-                    if (pos.equals(start)) {
-                        out.print(SET_BG_COLOR_YELLOW);
-                    } else if (endPositions.contains(pos) && posIsEven(pos)) {
-                        out.print(SET_BG_COLOR_DARK_GREEN);
-                    } else if (endPositions.contains(pos)) {
-                        out.print(SET_BG_COLOR_GREEN);
-                    } else if (whiteBackground) {
-                        out.print(SET_BG_COLOR_WHITE);
-                    } else {
-                        out.print(SET_BG_COLOR_BLACK);
-                    }
-                }
-
-                // get the String being printed
-                String pieceRep = getString(piece);
-
-                out.print(" " + pieceRep + " ");
+                processPosition(i, j, board, validMoves, start, endPositions, out);
 
                 if (j == 1 && i != 8) {
                     drawEdge(out, i, i + 1);
@@ -208,5 +140,45 @@ public class ChessboardDisplay {
         }
         out.print(EMPTY);
         out.println(RESET);
+    }
+
+    private static void processPosition(int i, int j, ChessBoard board, Collection<ChessMove> validMoves,
+                                        ChessPosition start, List<ChessPosition> endPositions, PrintStream out) {
+        ChessPosition pos = new ChessPosition(i, j);
+        ChessPiece piece = board.getPiece(pos);
+
+
+        if (piece != null) {
+            if (piece.getTeamColor().equals(WHITE)) {
+                out.print(SET_TEXT_COLOR_RED);
+            } else {
+                out.print(SET_TEXT_COLOR_BLUE);
+            }
+        }
+
+        if (validMoves == null) {
+            if (whiteBackground) {
+                out.print(SET_BG_COLOR_WHITE);
+            } else {
+                out.print(SET_BG_COLOR_BLACK);
+            }
+        } else {
+            if (pos.equals(start)) {
+                out.print(SET_BG_COLOR_YELLOW);
+            } else if (endPositions.contains(pos) && posIsEven(pos)) {
+                out.print(SET_BG_COLOR_DARK_GREEN);
+            } else if (endPositions.contains(pos)) {
+                out.print(SET_BG_COLOR_GREEN);
+            } else if (whiteBackground) {
+                out.print(SET_BG_COLOR_WHITE);
+            } else {
+                out.print(SET_BG_COLOR_BLACK);
+            }
+        }
+
+        // get the String being printed
+        String pieceRep = getString(piece);
+
+        out.print(" " + pieceRep + " ");
     }
 }
