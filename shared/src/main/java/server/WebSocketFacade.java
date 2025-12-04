@@ -42,11 +42,11 @@ public class WebSocketFacade {
                     switch (base.getServerMessageType()) {
                         case LOAD_GAME -> {
                             LoadGameMessage loadGame = gson.fromJson(message, LoadGameMessage.class);
-                            notificationHandler.notify(loadGame);
+                            notificationHandler.displayGame(loadGame);
                         }
                         case ERROR -> {
                             ErrorMessage error = gson.fromJson(message, ErrorMessage.class);
-                            notificationHandler.notify(error);
+                            notificationHandler.error(error);
                         }
                         case NOTIFICATION -> {
                             notificationHandler.notify(base);

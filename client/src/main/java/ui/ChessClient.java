@@ -9,6 +9,8 @@ import model.*;
 import server.NotificationHandler;
 import server.ServerFacade;
 import server.WebSocketFacade;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -85,6 +87,16 @@ public class ChessClient implements NotificationHandler {
 
     public void notify(ServerMessage notification) {
         System.out.println(SET_TEXT_COLOR_MAGENTA + notification.getMessage());
+        printPrompt();
+    }
+
+    public void error(ErrorMessage errorMessage) {
+        System.out.println(SET_TEXT_COLOR_MAGENTA + errorMessage.getErrorMessage());
+        printPrompt();
+    }
+
+    public void displayGame(LoadGameMessage loadGameMessage) {
+        System.out.println(SET_TEXT_COLOR_MAGENTA + loadGameMessage.getGame());
         printPrompt();
     }
 
