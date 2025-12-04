@@ -1,11 +1,9 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 
 import java.io.PrintStream;
+import java.util.Collection;
 
 import static chess.ChessGame.TeamColor.*;
 import static chess.ChessPiece.PieceType.*;
@@ -22,7 +20,8 @@ public class ChessboardDisplay {
 
     private static boolean whiteBackground = true;
 
-    public static void drawWhiteBoard(PrintStream out, ChessBoard board) {
+    public static void drawWhiteBoard(PrintStream out, ChessBoard board, Collection<ChessMove> validMoves) {
+        out.println();
         drawHorizontalFrameWhite(out);
         out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
         out.print(" 8 ");
@@ -62,11 +61,12 @@ public class ChessboardDisplay {
         out.print(" 1 ");
         out.println(RESET);
         drawHorizontalFrameWhite(out);
-        out.println(RESET);
+        out.print(RESET);
         whiteBackground = true;
     }
 
-    public static void drawBlackBoard(PrintStream out, ChessBoard board) {
+    public static void drawBlackBoard(PrintStream out, ChessBoard board, Collection<ChessMove> validMoves) {
+        out.println();
         drawHorizontalFrameBlack(out);
         out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
         out.print(" 1 ");
@@ -106,7 +106,7 @@ public class ChessboardDisplay {
         out.print(" 8 ");
         out.println(RESET);
         drawHorizontalFrameBlack(out);
-        out.println(RESET);
+        out.print(RESET);
         whiteBackground = true;
     }
 

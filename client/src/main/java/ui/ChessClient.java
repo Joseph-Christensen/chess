@@ -57,6 +57,9 @@ public class ChessClient implements NotificationHandler {
                 System.out.print(msg);
             }
         }
+        if (state.equals(State.INGAME)) {
+            leave();
+        }
     }
 
     private String eval(String input) {
@@ -76,7 +79,7 @@ public class ChessClient implements NotificationHandler {
                 case "logout" -> logout();
                 case "move" -> makeMove(params);
                 case "highlight" -> highlight(params);
-                case "redraw" -> redraw(currentGame);
+                case "redraw" -> redraw();
                 case "resign" -> resign();
                 case "leave" -> leave();
                 default -> invalidCommand();
@@ -97,9 +100,8 @@ public class ChessClient implements NotificationHandler {
     }
 
     public void displayGame(LoadGameMessage loadGameMessage) {
-        ChessGame game = gson.fromJson(loadGameMessage.getGame(), ChessGame.class);
-        currentGame = game;
-        redraw(game);
+        currentGame = gson.fromJson(loadGameMessage.getGame(), ChessGame.class);
+        redraw();
         printPrompt();
     }
 
@@ -389,20 +391,41 @@ public class ChessClient implements NotificationHandler {
         }
     }
 
-    private String highlight(String[] params) {
+    private String highlight(String[] params) throws ResponseException {
         if (state != State.INGAME) {return invalidCommand();}
         if (params.length != 1) {return "Please enter a board space.";}
-        // something checking valid move syntax
-        return params[0];
+
+        try {
+            String startPos = params[0].toLowerCase();
+            ChessPosition start = translatePosition(startPos);
+
+            ChessPiece piece = currentGame.getBoard().getPiece(start);
+            if (piece == null) {
+                return "There is no piece on " + startPos + ".";
+            }
+
+            var validMoves = currentGame.validMoves(start);
+
+            var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+            if (team.equals(BLACK)) {
+                ChessboardDisplay.drawBlackBoard(out, currentGame.getBoard(), null);
+            } else {
+                ChessboardDisplay.drawWhiteBoard(out, currentGame.getBoard(), null);
+            }
+
+            return "Highlight Successful!";
+        } catch (ResponseException ex) {
+            return failure("Highlight", ex.getMessage());
+        }
     }
 
-    private String redraw(ChessGame game) {
+    private String redraw() {
         if (state != State.INGAME) {return invalidCommand();}
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         if (team.equals(BLACK)) {
-            ChessboardDisplay.drawBlackBoard(out, game.getBoard());
+            ChessboardDisplay.drawBlackBoard(out, currentGame.getBoard(), null);
         } else {
-            ChessboardDisplay.drawWhiteBoard(out, game.getBoard());
+            ChessboardDisplay.drawWhiteBoard(out, currentGame.getBoard(), null);
         }
         return "Redraw Successful!";
     }
@@ -428,7 +451,7 @@ public class ChessClient implements NotificationHandler {
             return success("Leave", "Left the Game" + help());
 
         } catch (IOException ex) {
-            return failure("Leave", ex.getMessage());
+            return failure("Leave", ex.getMessage() + "\n  ");
         }
     }
 
