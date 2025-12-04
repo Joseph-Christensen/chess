@@ -48,9 +48,7 @@ public class WebSocketFacade {
                             ErrorMessage error = gson.fromJson(message, ErrorMessage.class);
                             notificationHandler.error(error);
                         }
-                        case NOTIFICATION -> {
-                            notificationHandler.notify(base);
-                        }
+                        case NOTIFICATION -> notificationHandler.notify(base);
                     }
                 }
             });

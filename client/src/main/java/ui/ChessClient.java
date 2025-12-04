@@ -19,7 +19,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static chess.ChessGame.TeamColor.*;
-import static chess.ChessPiece.PieceType.*;
 import static exception.ResponseException.Code.*;
 import static ui.EscapeSequences.*;
 
@@ -269,12 +268,7 @@ public class ChessClient implements NotificationHandler {
             server.joinGame(req, authToken);
             ws.join(req.gameID(), authToken);
             state = State.INGAME;
-            var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-            if (color.equals("WHITE")) {
-                ChessboardDisplay.drawWhiteBoard(out);
-            } else {
-                ChessboardDisplay.drawBlackBoard(out);
-            }
+            redraw(currentGame);
             return success("Join", "joined game " + gameID + " as " + req.playerColor() + "\n  " + help());
         } catch (ResponseException ex) {
             String message;
@@ -304,7 +298,7 @@ public class ChessClient implements NotificationHandler {
             ws.join(req.gameID(), authToken);
             state = State.INGAME;
             var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-            ChessboardDisplay.drawWhiteBoard(out);
+            ChessboardDisplay.drawWhiteBoardInitial(out);
             return success("Observe", "observing game " + gameID + "\n  " + help());
         } catch (ResponseException ex) {
             String message = (ex.getCode() == ResponseException.fromHttpStatusCode(400)) ?
@@ -404,7 +398,13 @@ public class ChessClient implements NotificationHandler {
     private String redraw(ChessGame game) {
         if (state != State.INGAME) {return invalidCommand();}
         currentGame = game;
-        return "Redrawing!";
+        var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
+        if (team.equals(BLACK)) {
+            ChessboardDisplay.drawBlackBoard(out, game.getBoard());
+        } else {
+            ChessboardDisplay.drawWhiteBoard(out, game.getBoard());
+        }
+        return "Redraw Successful!";
     }
 
     private String resign() {
