@@ -1,6 +1,7 @@
 package ui;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import chess.ChessPiece;
 import chess.ChessPosition;
 import exception.ResponseException;
@@ -29,6 +30,8 @@ public class ChessClient implements NotificationHandler {
     private String username = null;
     private ChessGame.TeamColor team = null;
     private ChessGame currentGame = new ChessGame();
+    private int currentGameID = -1;
+    private final Scanner scanner = new Scanner(System.in);
 
     public ChessClient (String serverURL) throws ResponseException {
         server = new ServerFacade(serverURL);
@@ -38,7 +41,6 @@ public class ChessClient implements NotificationHandler {
     public void repl() {
         System.out.print("  " + help());
 
-        Scanner scanner = new Scanner(System.in);
         String line = "";
         while (!line.equals("quit")) {
             printPrompt();
@@ -251,6 +253,7 @@ public class ChessClient implements NotificationHandler {
         try {
             HashSet<GameRepresentation> gamesSet = server.listGames(authToken);
             JoinRequest req = getJoinRequest(gamesSet, gameID, color);
+            currentGameID = req.gameID();
             server.joinGame(req, authToken);
             ws.join(req.gameID(), authToken);
             state = State.INGAME;
@@ -334,10 +337,54 @@ public class ChessClient implements NotificationHandler {
             ChessPosition start = translatePosition(startPos);
             ChessPosition end = translatePosition(endPos);
 
-//            if (team.equals(WHITE) && start.getRow() == 7 && currentGame.getBoard().getPiece(start).equals(PAWN)) {
-//
-//            }
-        } catch (ResponseException ex) {
+            ChessPiece piece = currentGame.getBoard().getPiece(start);
+            if (piece == null) {
+                return "There is no piece on " + startPos + ".";
+            }
+
+            ChessGame.TeamColor pieceColor = piece.getTeamColor();
+
+            if (pieceColor != team) {
+                return "That is an enemy piece.";
+            }
+
+            ChessMove move;
+
+            boolean isPawn = piece.getPieceType() == ChessPiece.PieceType.PAWN;
+            boolean reachesEnd = (pieceColor == ChessGame.TeamColor.WHITE && end.getRow() == 8) ||
+                            (pieceColor == ChessGame.TeamColor.BLACK && end.getRow() == 1);
+
+            if (isPawn && reachesEnd) {
+
+                System.out.println(SET_TEXT_COLOR_MAGENTA + "\n  What piece do you want to promote to? (Q|R|B|N): " + SET_TEXT_COLOR_GREEN);
+                String choice = scanner.nextLine().trim().toUpperCase();
+
+                ChessPiece.PieceType promotionPiece = null;
+
+                while (promotionPiece == null) {
+                    switch (choice) {
+                        case "Q" -> promotionPiece = ChessPiece.PieceType.QUEEN;
+                        case "R" -> promotionPiece = ChessPiece.PieceType.ROOK;
+                        case "B" -> promotionPiece = ChessPiece.PieceType.BISHOP;
+                        case "N" -> promotionPiece = ChessPiece.PieceType.KNIGHT;
+                        default -> {
+                            System.out.println(SET_TEXT_COLOR_MAGENTA + "\n  Invalid choice. Enter (Q|R|B|N): " + SET_TEXT_COLOR_GREEN);
+                            choice = scanner.nextLine().trim().toUpperCase();
+                        }
+                    }
+                }
+
+                move = new ChessMove(start, end, promotionPiece);
+
+            } else {
+                // Normal move
+                move = new ChessMove(start, end, null);
+            }
+
+            ws.makeMove(currentGameID, authToken, move);
+
+            return success("Move", "Successfully moved from " + startPos + " to " + endPos + ".");
+        } catch (ResponseException | IOException ex) {
             return failure("Move", ex.getMessage());
         }
     }
