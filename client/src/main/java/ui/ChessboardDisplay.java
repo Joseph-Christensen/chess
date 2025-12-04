@@ -32,6 +32,7 @@ public class ChessboardDisplay {
             }
         }
         out.println();
+        out.println();
         drawHorizontalFrameWhite(out);
         out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
         out.print(" 8 ");
@@ -58,6 +59,8 @@ public class ChessboardDisplay {
                 } else {
                     if (pos.equals(start)) {
                         out.print(SET_BG_COLOR_YELLOW);
+                    } else if (endPositions.contains(pos) && posIsEven(pos)) {
+                        out.print(SET_BG_COLOR_DARK_GREEN);
                     } else if (endPositions.contains(pos)) {
                         out.print(SET_BG_COLOR_GREEN);
                     } else if (whiteBackground) {
@@ -88,6 +91,15 @@ public class ChessboardDisplay {
     }
 
     public static void drawBlackBoard(PrintStream out, ChessBoard board, Collection<ChessMove> validMoves) {
+        ChessPosition start = null;
+        List<ChessPosition> endPositions = new ArrayList<>();
+        if (validMoves != null) {
+            for (ChessMove move : validMoves) {
+                start = move.getStartPosition();
+                endPositions.add(move.getEndPosition());
+            }
+        }
+        out.println();
         out.println();
         drawHorizontalFrameBlack(out);
         out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
@@ -106,10 +118,24 @@ public class ChessboardDisplay {
                     }
                 }
 
-                if (whiteBackground) {
-                    out.print(SET_BG_COLOR_WHITE);
+                if (validMoves == null) {
+                    if (whiteBackground) {
+                        out.print(SET_BG_COLOR_WHITE);
+                    } else {
+                        out.print(SET_BG_COLOR_BLACK);
+                    }
                 } else {
-                    out.print(SET_BG_COLOR_BLACK);
+                    if (pos.equals(start)) {
+                        out.print(SET_BG_COLOR_YELLOW);
+                    } else if (endPositions.contains(pos) && posIsEven(pos)) {
+                        out.print(SET_BG_COLOR_DARK_GREEN);
+                    } else if (endPositions.contains(pos)) {
+                        out.print(SET_BG_COLOR_GREEN);
+                    } else if (whiteBackground) {
+                        out.print(SET_BG_COLOR_WHITE);
+                    } else {
+                        out.print(SET_BG_COLOR_BLACK);
+                    }
                 }
 
                 // get the String being printed
@@ -130,6 +156,10 @@ public class ChessboardDisplay {
         drawHorizontalFrameBlack(out);
         out.print(RESET);
         whiteBackground = true;
+    }
+
+    private static boolean posIsEven(ChessPosition pos) {
+        return (pos.getRow() + pos.getColumn()) % 2 == 0;
     }
 
     private static void drawEdge(PrintStream out, int row1, int row2) {
