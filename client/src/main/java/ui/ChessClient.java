@@ -1,5 +1,8 @@
 package ui;
 
+import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import exception.ResponseException;
 import model.*;
 import server.NotificationHandler;
@@ -7,10 +10,14 @@ import server.ServerFacade;
 import server.WebSocketFacade;
 import websocket.messages.ServerMessage;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import static chess.ChessGame.TeamColor.*;
+import static chess.ChessPiece.PieceType.*;
+import static exception.ResponseException.Code.*;
 import static ui.EscapeSequences.*;
 
 public class ChessClient implements NotificationHandler {
@@ -20,6 +27,8 @@ public class ChessClient implements NotificationHandler {
     private final WebSocketFacade ws;
     private String authToken = null;
     private String username = null;
+    private ChessGame.TeamColor team = null;
+    private ChessGame currentGame = new ChessGame();
 
     public ChessClient (String serverURL) throws ResponseException {
         server = new ServerFacade(serverURL);
@@ -62,7 +71,7 @@ public class ChessClient implements NotificationHandler {
                 case "logout" -> logout();
                 case "move" -> makeMove(params);
                 case "highlight" -> highlight(params);
-                case "redraw" -> redraw();
+                case "redraw" -> redraw(currentGame);
                 case "resign" -> resign();
                 case "leave" -> leave();
                 default -> invalidCommand();
@@ -231,8 +240,10 @@ public class ChessClient implements NotificationHandler {
         String color;
         if (params[1].toLowerCase().matches("black")) {
             color = "BLACK";
+            team = BLACK;
         } else if (params[1].toLowerCase().matches("white")) {
             color = "WHITE";
+            team = WHITE;
         } else {
             return "Please enter a valid color to join: \"BLACK\" or \"WHITE\"";
         }
@@ -241,6 +252,7 @@ public class ChessClient implements NotificationHandler {
             HashSet<GameRepresentation> gamesSet = server.listGames(authToken);
             JoinRequest req = getJoinRequest(gamesSet, gameID, color);
             server.joinGame(req, authToken);
+            ws.join(req.gameID(), authToken);
             state = State.INGAME;
             var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
             if (color.equals("WHITE")) {
@@ -259,18 +271,20 @@ public class ChessClient implements NotificationHandler {
                 message = ex.getMessage();
             }
             return failure("Join", message);
+        } catch (IOException ex) {
+            return failure("Join", ex.getMessage());
         }
     }
 
     private static JoinRequest getJoinRequest(HashSet<GameRepresentation> gamesSet, int inputID, String color) throws ResponseException {
         if (gamesSet == null || gamesSet.isEmpty()) {
-            throw new ResponseException(ResponseException.Code.BadRequest, "No games available");
+            throw new ResponseException(BadRequest, "No games available");
         }
 
         List<GameRepresentation> games = new ArrayList<>(gamesSet);
 
         if (inputID < 1 || inputID > games.size()) {
-            throw new ResponseException(ResponseException.Code.BadRequest, "Invalid game ID");
+            throw new ResponseException(BadRequest, "Invalid game ID");
         }
 
         int gameID = games.get(inputID - 1).gameID();
@@ -313,7 +327,48 @@ public class ChessClient implements NotificationHandler {
         if (state != State.INGAME) {return invalidCommand();}
         if (params.length != 2) {return "Please enter a start and end board space.";}
         // something checking valid move syntax
-        return params[0];
+        try {
+            String startPos = params[0].toLowerCase();
+            String endPos = params[1].toLowerCase();
+
+            ChessPosition start = translatePosition(startPos);
+            ChessPosition end = translatePosition(endPos);
+
+//            if (team.equals(WHITE) && start.getRow() == 7 && currentGame.getBoard().getPiece(start).equals(PAWN)) {
+//
+//            }
+        } catch (ResponseException ex) {
+            return failure("Move", ex.getMessage());
+        }
+    }
+
+    private ChessPosition translatePosition(String pos) throws ResponseException {
+        String errorMessage = "Chess positions must be in the format <a-h><1-8>.";
+        if (pos.length() != 2) {
+            throw new ResponseException(ResponseException.Code.BadRequest, errorMessage);
+        }
+
+        char colChar = pos.charAt(0);
+        char rowChar = pos.charAt(1);
+
+        // check a-h
+        if (colChar < 'a' || colChar > 'h') {
+            if (colChar < 'A' || colChar > 'H') {
+                throw new ResponseException(ResponseException.Code.BadRequest, errorMessage);
+            }
+        }
+
+        // check 1-8
+        if (rowChar < '1' || rowChar > '8') {
+            throw new ResponseException(ResponseException.Code.BadRequest, errorMessage);
+        }
+
+        colChar = Character.toLowerCase(colChar);
+
+        int col = colChar - 'a' + 1;
+        int row = rowChar - '1' + 1;
+
+        return new ChessPosition(row, col);
     }
 
     private String highlight(String[] params) {
@@ -323,8 +378,9 @@ public class ChessClient implements NotificationHandler {
         return params[0];
     }
 
-    private String redraw() {
+    private String redraw(ChessGame game) {
         if (state != State.INGAME) {return invalidCommand();}
+        currentGame = game;
         return "Redrawing!";
     }
 

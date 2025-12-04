@@ -59,7 +59,7 @@ public class WebSocketFacade {
         }
     }
 
-    public void connect(int gameID, String authToken) throws IOException {
+    public void join(int gameID, String authToken) throws IOException {
         UserGameCommand command = new UserGameCommand(CONNECT, authToken, gameID);
         session.getBasicRemote().sendText(gson.toJson(command));
     }
