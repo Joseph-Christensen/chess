@@ -164,6 +164,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String moveMsg = String.format("%s moved from %s to %s.", username, start, end);
             connections.broadcast(gameID, session, new ServerMessage(NOTIFICATION, moveMsg));
 
+            String selfMsg = String.format("You moved from %s to %s.", start, end);
+            connections.sendSelf(session, new ServerMessage(NOTIFICATION, selfMsg));
+
             // check for checkmate, check, stalemate
             ChessGame.TeamColor opponent = (turn == WHITE) ? BLACK : WHITE;
             if (game.isInCheckmate(opponent)) {
