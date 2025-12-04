@@ -67,7 +67,47 @@ public class ChessboardDisplay {
     }
 
     public static void drawBlackBoard(PrintStream out, ChessBoard board) {
+        drawHorizontalFrameBlack(out);
+        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
+        out.print(" 1 ");
+        for (int i = 1; i < SIZE + 1; i++) {
+            for (int j = 1; j < SIZE + 1; j++) {
+                ChessPosition pos = new ChessPosition(i, j);
+                ChessPiece piece = board.getPiece(pos);
 
+
+                if (piece != null) {
+                    if (piece.getTeamColor().equals(WHITE)) {
+                        out.print(SET_TEXT_COLOR_RED);
+                    } else {
+                        out.print(SET_TEXT_COLOR_BLUE);
+                    }
+                }
+
+                if (whiteBackground) {
+                    out.print(SET_BG_COLOR_WHITE);
+                } else {
+                    out.print(SET_BG_COLOR_BLACK);
+                }
+
+                // get the String being printed
+                String pieceRep = getString(piece);
+
+                out.print(" " + pieceRep + " ");
+
+                if (j == 8 && i != 8) {
+                    drawEdge(out, i, i + 1);
+                } else {
+                    whiteBackground = !whiteBackground;
+                }
+            }
+        }
+        out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
+        out.print(" 8 ");
+        out.println(RESET);
+        drawHorizontalFrameBlack(out);
+        out.println(RESET);
+        whiteBackground = true;
     }
 
     private static void drawEdge(PrintStream out, int row1, int row2) {

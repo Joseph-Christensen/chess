@@ -297,8 +297,7 @@ public class ChessClient implements NotificationHandler {
             server.observeGame(gameID, authToken);
             ws.join(req.gameID(), authToken);
             state = State.INGAME;
-            var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-            ChessboardDisplay.drawWhiteBoardInitial(out);
+            redraw(currentGame);
             return success("Observe", "observing game " + gameID + "\n  " + help());
         } catch (ResponseException ex) {
             String message = (ex.getCode() == ResponseException.fromHttpStatusCode(400)) ?
