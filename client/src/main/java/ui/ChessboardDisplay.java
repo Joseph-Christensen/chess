@@ -3,7 +3,9 @@ package ui;
 import chess.*;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import static chess.ChessGame.TeamColor.*;
 import static chess.ChessPiece.PieceType.*;
@@ -21,6 +23,14 @@ public class ChessboardDisplay {
     private static boolean whiteBackground = true;
 
     public static void drawWhiteBoard(PrintStream out, ChessBoard board, Collection<ChessMove> validMoves) {
+        ChessPosition start = null;
+        List<ChessPosition> endPositions = new ArrayList<>();
+        if (validMoves != null) {
+            for (ChessMove move : validMoves) {
+                start = move.getStartPosition();
+                endPositions.add(move.getEndPosition());
+            }
+        }
         out.println();
         drawHorizontalFrameWhite(out);
         out.print(SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK);
@@ -39,10 +49,22 @@ public class ChessboardDisplay {
                     }
                 }
 
-                if (whiteBackground) {
-                    out.print(SET_BG_COLOR_WHITE);
+                if (validMoves == null) {
+                    if (whiteBackground) {
+                        out.print(SET_BG_COLOR_WHITE);
+                    } else {
+                        out.print(SET_BG_COLOR_BLACK);
+                    }
                 } else {
-                    out.print(SET_BG_COLOR_BLACK);
+                    if (pos.equals(start)) {
+                        out.print(SET_BG_COLOR_YELLOW);
+                    } else if (endPositions.contains(pos)) {
+                        out.print(SET_BG_COLOR_GREEN);
+                    } else if (whiteBackground) {
+                        out.print(SET_BG_COLOR_WHITE);
+                    } else {
+                        out.print(SET_BG_COLOR_BLACK);
+                    }
                 }
 
                 // get the String being printed

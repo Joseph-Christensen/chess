@@ -408,9 +408,9 @@ public class ChessClient implements NotificationHandler {
 
             var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
             if (team.equals(BLACK)) {
-                ChessboardDisplay.drawBlackBoard(out, currentGame.getBoard(), null);
+                ChessboardDisplay.drawBlackBoard(out, currentGame.getBoard(), validMoves);
             } else {
-                ChessboardDisplay.drawWhiteBoard(out, currentGame.getBoard(), null);
+                ChessboardDisplay.drawWhiteBoard(out, currentGame.getBoard(), validMoves);
             }
 
             return "Highlight Successful!";
