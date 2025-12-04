@@ -90,12 +90,12 @@ public class ChessClient implements NotificationHandler {
     }
 
     public void notify(ServerMessage notification) {
-        System.out.println(SET_TEXT_COLOR_MAGENTA + notification.getMessage());
+        System.out.print("\n" +SET_TEXT_COLOR_MAGENTA + notification.getMessage());
         printPrompt();
     }
 
     public void error(ErrorMessage errorMessage) {
-        System.out.println(SET_TEXT_COLOR_MAGENTA + errorMessage.getErrorMessage());
+        System.out.print("\n" + SET_TEXT_COLOR_MAGENTA + errorMessage.getErrorMessage());
         printPrompt();
     }
 
@@ -296,6 +296,7 @@ public class ChessClient implements NotificationHandler {
         if (!params[0].matches("\\d+")) {return "Please enter a number for your game id.";}
         int gameID = Integer.parseInt(params[0]);
         try {
+            team = null;
             HashSet<GameRepresentation> gamesSet = server.listGames(authToken);
             JoinRequest req = getJoinRequest(gamesSet, gameID, null);
             currentGameID = req.gameID();
@@ -327,9 +328,14 @@ public class ChessClient implements NotificationHandler {
 
     private String makeMove(String[] params) {
         if (state != State.INGAME) {return invalidCommand();}
+        if (team == null) {return "Observers can't play.";}
         if (params.length != 2) {return "Please enter a start and end board space.";}
         // something checking valid move syntax
         try {
+            if (currentGame.isOver()) {
+                return currentGame.getGameOverReason();
+            }
+
             if (currentGame.getTeamTurn() != team) {
                 return "It isn't your turn.";
             }
@@ -358,7 +364,7 @@ public class ChessClient implements NotificationHandler {
 
             if (isPawn && reachesEnd) {
 
-                System.out.println(SET_TEXT_COLOR_MAGENTA + "\n  What piece do you want to promote to? (Q|R|B|N): " + SET_TEXT_COLOR_GREEN);
+                System.out.print(SET_TEXT_COLOR_MAGENTA + "\n  What piece do you want to promote to? (Q|R|B|N): " + SET_TEXT_COLOR_GREEN);
                 String choice = scanner.nextLine().trim().toUpperCase();
 
                 ChessPiece.PieceType promotionPiece = null;
@@ -385,13 +391,13 @@ public class ChessClient implements NotificationHandler {
 
             ws.makeMove(currentGameID, authToken, move);
 
-            return success("Move", "Successfully moved from " + startPos + " to " + endPos + ".");
+            return success("Move", "Moved from " + startPos + " to " + endPos + ".");
         } catch (ResponseException | IOException ex) {
             return failure("Move", ex.getMessage());
         }
     }
 
-    private String highlight(String[] params) throws ResponseException {
+    private String highlight(String[] params) {
         if (state != State.INGAME) {return invalidCommand();}
         if (params.length != 1) {return "Please enter a board space.";}
 
@@ -407,13 +413,15 @@ public class ChessClient implements NotificationHandler {
             var validMoves = currentGame.validMoves(start);
 
             var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-            if (team.equals(BLACK)) {
+            if (team == null) {
+                ChessboardDisplay.drawWhiteBoard(out, currentGame.getBoard(), validMoves);
+            } else if (team.equals(BLACK)) {
                 ChessboardDisplay.drawBlackBoard(out, currentGame.getBoard(), validMoves);
             } else {
                 ChessboardDisplay.drawWhiteBoard(out, currentGame.getBoard(), validMoves);
             }
 
-            return "Highlight Successful!";
+            return "";
         } catch (ResponseException ex) {
             return failure("Highlight", ex.getMessage());
         }
@@ -422,12 +430,14 @@ public class ChessClient implements NotificationHandler {
     private String redraw() {
         if (state != State.INGAME) {return invalidCommand();}
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-        if (team.equals(BLACK)) {
+        if (team == null) {
+            ChessboardDisplay.drawWhiteBoard(out, currentGame.getBoard(), null);
+        } else if (team.equals(BLACK)) {
             ChessboardDisplay.drawBlackBoard(out, currentGame.getBoard(), null);
         } else {
             ChessboardDisplay.drawWhiteBoard(out, currentGame.getBoard(), null);
         }
-        return "Redraw Successful!";
+        return "";
     }
 
     private String resign() {
@@ -448,10 +458,10 @@ public class ChessClient implements NotificationHandler {
             team = null;
             currentGame = new ChessGame();
             currentGameID = -1;
-            return success("Leave", "Left the Game" + help());
+            return success("Leave", "You left the Game\n  " + help());
 
         } catch (IOException ex) {
-            return failure("Leave", ex.getMessage() + "\n  ");
+            return failure("Leave", ex.getMessage());
         }
     }
 
