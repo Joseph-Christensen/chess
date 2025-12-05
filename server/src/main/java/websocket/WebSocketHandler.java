@@ -166,17 +166,21 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
             // check for checkmate, check, stalemate
             ChessGame.TeamColor opponent = (turn == WHITE) ? BLACK : WHITE;
+
+            String opponentName = (opponent == WHITE) ? updatedGameData.whiteUsername() :
+                    updatedGameData.blackUsername();
+
             if (game.isInCheckmate(opponent)) {
                 game.endGame();
                 connections.broadcast(gameID, null,
-                        new ServerMessage(NOTIFICATION, opponent + " is in checkmate!"));
+                        new ServerMessage(NOTIFICATION, opponentName + " is in checkmate!"));
             } else if (game.isInCheck(opponent)) {
                 connections.broadcast(gameID, null,
-                        new ServerMessage(NOTIFICATION, opponent + " is in check!"));
+                        new ServerMessage(NOTIFICATION, opponentName + " is in check!"));
             } else if (game.isInStalemate(opponent)) {
                 game.endGame();
                 connections.broadcast(gameID, null,
-                        new ServerMessage(NOTIFICATION, opponent + " is in stalemate!"));
+                        new ServerMessage(NOTIFICATION, opponentName + " is in stalemate!"));
             }
 
             dataAccess.updateGame(updatedGameData);

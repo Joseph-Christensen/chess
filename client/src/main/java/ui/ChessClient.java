@@ -370,7 +370,8 @@ public class ChessClient implements NotificationHandler {
             }
 
             ws.makeMove(currentGameID, authToken, move);
-            return "You moved from " + startPos + " to " + endPos  + ".";
+
+            return "";
         } catch (ResponseException | IOException ex) {
             return failure("Move", ex.getMessage());
         }
@@ -422,9 +423,28 @@ public class ChessClient implements NotificationHandler {
             if (currentGame.isOver()) {
                 return currentGame.getGameOverReason();
             }
-            currentGame.resign(team);
-            ws.resign(currentGameID, authToken);
-            return success("Resign", "You resigned.");
+
+            System.out.print(SET_TEXT_COLOR_MAGENTA + "\n  Are you sure you want to resign? (Y|N) " + SET_TEXT_COLOR_GREEN);
+            String choice = scanner.nextLine().trim().toUpperCase();
+
+            String str = "";
+            while (str.isEmpty()) {
+                switch (choice) {
+                    case "Y" -> str = "yes";
+                    case "N" -> str = "no";
+                    default -> {
+                        System.out.println(SET_TEXT_COLOR_MAGENTA + "\n  Invalid choice. Enter (Y|N): " + SET_TEXT_COLOR_GREEN);
+                        choice = scanner.nextLine().trim().toUpperCase();
+                    }
+                }
+            }
+            if (str.equals("yes")) {
+                currentGame.resign(team);
+                ws.resign(currentGameID, authToken);
+                return success("Resign", "You resigned.");
+            } else {
+                return "You didn't resign.";
+            }
         } catch (IOException ex) {
             return failure("Resign", ex.getMessage());
         }
